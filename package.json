@@ -1,0 +1,38 @@
+{
+  "name": "deltalab",
+  "version": "0.1.0",
+  "private": true,
+  "description": "React 18 + TypeScript + Electron 双端应用（支持 Web 静态部署与 Windows 桌面打包）",
+  "main": "out/main/index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "electron-vite dev",
+    "dev:web": "vite",
+    "build:web": "vite build",
+    "build:desktop": "electron-vite build",
+    "build:win": "npm run build:desktop && electron-builder --win",
+    "preview:web": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit"
+  },
+  "dependencies": {
+    "antd": "^5.29.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.6",
+    "xlsx": "^0.18.5",
+    "zustand": "^4.5.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.4",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^5.2.0",
+    "electron": "^41.7.1",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^5.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.6"
+  }
+}

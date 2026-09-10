@@ -1,0 +1,19 @@
+appId: com.deltalab.app
+productName: DeltaLab
+
+directories:
+  output: release
+
+# 渲染层依赖已被 Vite 打包进 out/renderer，主进程与预加载只依赖 electron 内置模块，
+# 因此无需携带 node_modules，安装包体积更小。
+files:
+  - out/**/*
+  - package.json
+
+win:
+  target: nsis
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
