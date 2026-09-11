@@ -35,21 +35,21 @@ export function useWeaponTransfer(weapons: WeaponRecord[]) {
   /** 导出前统一拦截空列表，避免下载出无意义的空表 */
   function hasWeapons(): boolean {
     if (weapons.length > 0) return true
-    message.warning('当前没有可导出的武器')
+    message.warning('当前没有可导出的枪械')
     return false
   }
 
   /** 导出当前全部武器为 Excel 表 */
   function exportExcel(): void {
     if (!hasWeapons()) return
-    downloadBlob(weaponsToXlsxBlob(weapons), `武器数据-${dateStamp()}.xlsx`)
+    downloadBlob(weaponsToXlsxBlob(weapons), `枪械数据-${dateStamp()}.xlsx`)
   }
 
   /** 导出当前全部武器为 JSON */
   function exportJson(): void {
     if (!hasWeapons()) return
     const blob = new Blob([weaponsToJsonText(weapons)], { type: 'application/json' })
-    downloadBlob(blob, `武器数据-${dateStamp()}.json`)
+    downloadBlob(blob, `枪械数据-${dateStamp()}.json`)
   }
 
   /**
@@ -84,7 +84,7 @@ export function useWeaponTransfer(weapons: WeaponRecord[]) {
 
     // 两个覆盖入口共用同一段确认逻辑，保证提示与按钮样式一致
     modal.confirm({
-      title: '确认覆盖全部武器数据？',
+      title: '确认覆盖全枪械数据？',
       content: `当前 ${weapons.length} 条，导入后 ${merged.replaced.length} 条，将移除 ${merged.removed} 条现有数据。`,
       okText: '覆盖',
       cancelText: '取消',

@@ -45,6 +45,19 @@ function toFormValues(weapon: Weapon): WeaponFormValues {
   };
 }
 
+/**
+ * 规范化枪械名称：
+ * 1. 将长破折号「—」统一替换为连接符「-」（按这两种符号分割即完成替换）
+ * 2. 各段去除首尾空白后，用「 - 」重新拼接，保证连接符左右各有一个空格
+ */
+function normalizeName(name: string): string {
+  return name
+    .split(/[-—]/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join(" - ");
+}
+
 /** 部位倍率字段：字段名与 HitboxPart 一致，可直接作为 Form.Item 的 name 路径 */
 const PART_FIELDS: ReadonlyArray<{ part: HitboxPart; label: string }> = [
   { part: "head", label: "头部倍率" },
@@ -102,7 +115,8 @@ export default function WeaponFormModal({
         start: index === 0 ? 0 : values.range[index - 1].end!,
         multiplier: item.multiplier,
       }));
-      onSubmit({ ...values, range });
+      // 名称按命名规则规范化后再提交
+      onSubmit({ ...values, name: normalizeName(values.name), range });
       form.resetFields();
     } catch {
       // 校验失败由表单自身展示错误提示
@@ -117,7 +131,7 @@ export default function WeaponFormModal({
 
   return (
     <Modal
-      title={isEditing ? "编辑武器" : "导入武器"}
+      title={isEditing ? "编辑枪械" : "导入枪械"}
       open={open}
       okText={isEditing ? "保存" : "导入"}
       cancelText="取消"
@@ -128,7 +142,7 @@ export default function WeaponFormModal({
     >
       <Form form={form} layout="vertical" initialValues={INITIAL_VALUES}>
         <Form.Item
-          label="枪械名称（命名规则：枪械 - 增伤配件 - 增/减伤弹）"
+          label="枪械名称（命名规则：枪械 - 增伤配件 - 枪管 - 射程枪口 - 增/减伤弹）"
           name="name"
           rules={[{ required: true, message: "请输入枪械名称" }]}
         >

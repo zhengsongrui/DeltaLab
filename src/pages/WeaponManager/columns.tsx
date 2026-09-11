@@ -1,6 +1,7 @@
 import type { TableColumnsType } from 'antd'
 import { Button, Popconfirm, Space } from 'antd'
-import type { HitboxPart, WeaponRange, WeaponRecord } from '@/types/weapon'
+import RangeBar, { RANGE_COLUMN_WIDTH } from '@/components/RangeBar'
+import type { HitboxPart, WeaponRecord } from '@/types/weapon'
 
 /** 各受击部位的中文名，顺序即表格列顺序 */
 const PART_LABELS: ReadonlyArray<{ part: HitboxPart; label: string }> = [
@@ -11,57 +12,73 @@ const PART_LABELS: ReadonlyArray<{ part: HitboxPart; label: string }> = [
 ]
 
 /**
- * 把射程分段拼成可读文本
- * 每段用自身 start 与下一段 start 组成 [start, end)；末段无终点，显示「N米以上」
- * 例如 1倍(0-27米)｜0.9倍(27-35米)｜0.7倍(54米以上)
- */
-function formatRange(ranges: WeaponRange[]): string {
-  return ranges
-    .map((item, index) => {
-      const end = ranges[index + 1]?.start
-      const span = end === undefined ? `${item.start}米以上` : `${item.start}-${end}米`
-      return `${item.multiplier}倍(${span})`
-    })
-    .join('｜')
-}
-
-/**
  * 武器管理表格列：字段与 src/data/weapons.ts 一一对应
+ * 除枪械名称保持左对齐外，其余列的表头与单元格内容一律居中。
  * 操作列提供编辑与删除：编辑回调交出整行记录用于回填表单，删除带二次确认并交出该行 id
  */
 export function buildColumns(
   onEdit: (record: WeaponRecord) => void,
   onDelete: (id: string) => void,
 ): TableColumnsType<WeaponRecord> {
-  /** 各部位倍率列：原始字段，逐部位展示 */
+  /** 各部位倍率列：原始字段，逐部位展示，可按该部位倍率排序 */
   const multiplierColumns: TableColumnsType<WeaponRecord> = PART_LABELS.map(({ part, label }) => ({
     title: `${label}倍率`,
     dataIndex: ['hitMultiplier', part],
     key: `multiplier-${part}`,
-    align: 'right',
+    align: 'center',
+    sorter: (a, b) => a.hitMultiplier[part] - b.hitMultiplier[part],
   }))
 
   return [
-    { title: '枪械名称', dataIndex: 'name', key: 'name' },
-    { title: '基础伤害', dataIndex: ['damage', 'base'], key: 'damage-base', align: 'right' },
-    { title: '护甲伤害', dataIndex: ['damage', 'armor'], key: 'damage-armor', align: 'right' },
-    { title: '射速 RPM', dataIndex: 'fireRate', key: 'fireRate', align: 'right' },
+    // 枪械名称保持左对齐以便扫读名称，其余列一律居中
+    // 除射程（方块图无法比较）与操作（无数据）外，其余列均可点击表头排序
+    {
+      title: '枪械名称',
+      dataIndex: 'name',
+      key: 'name',
+      sorter: (a, b) => a.name.localeCompare(b.name, 'zh'),
+    },
+    {
+      title: '基础伤害',
+      dataIndex: ['damage', 'base'],
+      key: 'damage-base',
+      align: 'center',
+      sorter: (a, b) => a.damage.base - b.damage.base,
+    },
+    {
+      title: '护甲伤害',
+      dataIndex: ['damage', 'armor'],
+      key: 'damage-armor',
+      align: 'center',
+      sorter: (a, b) => a.damage.armor - b.damage.armor,
+    },
+    {
+      title: '射速 RPM',
+      dataIndex: 'fireRate',
+      key: 'fireRate',
+      align: 'center',
+      sorter: (a, b) => a.fireRate - b.fireRate,
+    },
     {
       title: '射程',
       key: 'range',
-      render: (_value, row) => formatRange(row.range),
+      width: RANGE_COLUMN_WIDTH,
+      align: 'center',
+      // 方块图：固定表示 0-100 米，颜色与方块内数字表示各段倍率
+      render: (_value, row) => <RangeBar ranges={row.range} />,
     },
     ...multiplierColumns,
     {
       title: '操作',
       key: 'action',
+      align: 'center',
       render: (_value, row) => (
         <Space size="small">
           <Button size="small" onClick={() => onEdit(row)}>
             编辑
           </Button>
           <Popconfirm
-            title="确定删除该武器？"
+            title={`确定删除${row.name}？`}
             okText="删除"
             cancelText="取消"
             onConfirm={() => onDelete(row.id)}

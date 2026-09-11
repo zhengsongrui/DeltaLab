@@ -1,45 +1,45 @@
 import type { TableColumnsType } from 'antd'
 import type { ColumnGroup } from './components/ColumnSelector'
-import { formatRange } from './rows'
 import type { StatsRow, ViewMode } from './rows'
-import type { HitboxPart } from '@/types/weapon'
-import { calculateArmorDps, calculateDps, calculatePartDamage } from '@/utils/dps'
-
-/** 各受击部位的中文名，顺序即表格列顺序 */
-const partLabels: ReadonlyArray<{ part: HitboxPart; label: string }> = [
-  { part: 'head', label: '头部' },
-  { part: 'chest', label: '胸部' },
-  { part: 'abdomen', label: '腹部' },
-  { part: 'limbs', label: '四肢' },
-]
+import RangeBar, { RANGE_COLUMN_WIDTH } from '@/components/RangeBar'
+import type { HitWeight } from '@/utils/dps'
+import {
+  calculateArmorDps,
+  calculateCompositeDps,
+  calculateDps,
+  calculatePartDamage,
+} from '@/utils/dps'
+import { getRangeRgb, toCssRgb } from '@/utils/rangeColor'
+import { HITBOX_PART_LABELS } from './composite'
 
 /** 固定列：始终展示，不参与勾选 */
 const FIXED_COLUMN_KEYS: readonly string[] = ['name']
 
-/** 两个视图共用的可勾选列分组，由 partLabels 派生，新增部位时自动扩展 */
+/** 两个视图共用的可勾选列分组，由 HITBOX_PART_LABELS 派生，新增部位时自动扩展 */
 const commonColumnGroups: ReadonlyArray<ColumnGroup> = [
-  {
-    label: '部位倍率',
-    options: partLabels.map(({ part, label }) => ({
-      key: `multiplier-${part}`,
-      label: `${label}倍率`,
-    })),
-  },
+  // {
+  //   label: '部位倍率',
+  //   options: HITBOX_PART_LABELS.map(({ part, label }) => ({
+  //     key: `multiplier-${part}`,
+  //     label: `${label}倍率`,
+  //   })),
+  // },
   {
     label: '部位伤害',
-    options: partLabels.map(({ part, label }) => ({
+    options: HITBOX_PART_LABELS.map(({ part, label }) => ({
       key: `part-damage-${part}`,
       label: `${label}伤害`,
     })),
   },
   {
     label: '部位 DPS',
-    options: partLabels.map(({ part, label }) => ({
+    options: HITBOX_PART_LABELS.map(({ part, label }) => ({
       key: `dps-${part}`,
       label: `${label} DPS`,
     })),
   },
   { label: '护甲', options: [{ key: 'armor-dps', label: '护甲 DPS' }] },
+  { label: '综合', options: [{ key: 'dps-composite', label: '综合 DPS' }] },
 ]
 
 /**
@@ -82,29 +82,34 @@ export function getToggleableKeys(view: ViewMode): string[] {
  * 依据当前视图与射击距离生成表格列
  * 数值列的倍率一律取行字段 multiplier，因此两种视图共用同一套列定义，
  * 只有「基础信息」中依赖距离或射程段的列按视图分叉。
+ * 除枪械名称保持左对齐外，其余列的表头与单元格内容一律居中。
  */
-export function buildColumns(distance: number, view: ViewMode): TableColumnsType<StatsRow> {
+export function buildColumns(
+  distance: number,
+  view: ViewMode,
+  weights: HitWeight,
+): TableColumnsType<StatsRow> {
   /** 各部位倍率列：原始字段，不随距离或射程段变化 */
-  const multiplierColumns: TableColumnsType<StatsRow> = partLabels.map(({ part, label }) => ({
-    title: `${label}倍率`,
-    dataIndex: ['hitMultiplier', part],
-    key: `multiplier-${part}`,
-    align: 'right',
-  }))
+  // const multiplierColumns: TableColumnsType<StatsRow> = HITBOX_PART_LABELS.map(({ part, label }) => ({
+  //   title: `${label}倍率`,
+  //   dataIndex: ['hitMultiplier', part],
+  //   key: `multiplier-${part}`,
+  //   align: 'right',
+  // }))
 
   /** 各部位单发伤害列：按该行倍率换算 */
-  const damageColumns: TableColumnsType<StatsRow> = partLabels.map(({ part, label }) => ({
+  const damageColumns: TableColumnsType<StatsRow> = HITBOX_PART_LABELS.map(({ part, label }) => ({
     title: `${label}伤害`,
     key: `part-damage-${part}`,
-    align: 'right',
+    align: 'center',
     render: (_value, row) => calculatePartDamage(row, part, row.multiplier),
   }))
 
   /** 各部位 DPS 列：按该行倍率计算且可排序，默认按胸部 DPS 降序 */
-  const dpsColumns: TableColumnsType<StatsRow> = partLabels.map(({ part, label }) => ({
+  const dpsColumns: TableColumnsType<StatsRow> = HITBOX_PART_LABELS.map(({ part, label }) => ({
     title: `${label} DPS`,
     key: `dps-${part}`,
-    align: 'right',
+    align: 'center',
     sorter: (a, b) => calculateDps(a, part, a.multiplier) - calculateDps(b, part, b.multiplier),
     defaultSortOrder: part === 'chest' ? 'descend' : undefined,
     render: (_value, row) => calculateDps(row, part, row.multiplier),
@@ -117,43 +122,68 @@ export function buildColumns(distance: number, view: ViewMode): TableColumnsType
           {
             title: '各段射程伤害倍率',
             key: 'range',
-            render: (_value, row) => formatRange(row.range),
+            width: RANGE_COLUMN_WIDTH,
+            align: 'center',
+            // 方块图：固定表示 0-100 米，颜色与方块内数字表示各段倍率
+            render: (_value, row) => <RangeBar ranges={row.range} />,
           },
           {
             title: '当前距离伤害倍率',
             key: 'distance-multiplier',
-            align: 'right',
-            render: (_value, row) => `${row.multiplier}倍(${distance}米)`,
+            align: 'center',
+            // 字色由倍率换算：倍率越高越绿，越低越暗，与射程条保持同一色标
+            render: (_value, row) => (
+              <span style={{ color: toCssRgb(getRangeRgb(row.multiplier)) }}>
+                {`${row.multiplier}倍(${distance}米)`}
+              </span>
+            ),
           },
         ]
       : [
           {
             title: '当前射程伤害倍率',
             key: 'range-multiplier',
-            align: 'right',
-            render: (_value, row) =>
-              row.segment.end === null
-                ? `${row.multiplier}（${row.segment.start}米以上）`
-                : `${row.multiplier}（${row.segment.start}-${row.segment.end}米）`,
+            align: 'center',
+            // 字色由倍率换算：倍率越高越绿，越低越暗，与射程条保持同一色标
+            render: (_value, row) => (
+              <span style={{ color: toCssRgb(getRangeRgb(row.multiplier)) }}>
+                {row.segment.end === null
+                  ? `${row.multiplier}（${row.segment.start}米以上）`
+                  : `${row.multiplier}（${row.segment.start}-${row.segment.end}米）`}
+              </span>
+            ),
           },
         ]
 
   return [
+    // 枪械名称保持左对齐以便扫读名称，其余列一律居中
     { title: '枪械名称', dataIndex: 'name', key: 'name' },
-    { title: '基础伤害', dataIndex: ['damage', 'base'], key: 'damage-base', align: 'right' },
-    { title: '护甲伤害', dataIndex: ['damage', 'armor'], key: 'damage-armor', align: 'right' },
-    { title: '射速 RPM', dataIndex: 'fireRate', key: 'fireRate', align: 'right' },
     ...infoColumns,
-    ...multiplierColumns,
-    ...damageColumns,
+    { title: '射速 RPM', dataIndex: 'fireRate', key: 'fireRate', align: 'center' },
     ...dpsColumns,
     {
       title: '护甲 DPS',
       key: 'armor-dps',
-      align: 'right',
+      align: 'center',
       sorter: (a, b) => calculateArmorDps(a, a.multiplier) - calculateArmorDps(b, b.multiplier),
       render: (_value, row) => calculateArmorDps(row, row.multiplier),
     },
+    {
+      title: '综合 DPS',
+      key: 'dps-composite',
+      align: 'center',
+      // 展示与排序都走同一套加权计算，权重变化后两处结果始终一致；
+      // 不设默认排序，避免与胸部 DPS 的默认降序冲突
+      sorter: (a, b) =>
+        calculateCompositeDps(a, a.multiplier, weights) -
+        calculateCompositeDps(b, b.multiplier, weights),
+      render: (_value, row) => calculateCompositeDps(row, row.multiplier, weights),
+    },
+    { title: '基础伤害', dataIndex: ['damage', 'base'], key: 'damage-base', align: 'center' },
+    { title: '护甲伤害', dataIndex: ['damage', 'armor'], key: 'damage-armor', align: 'center' },
+    // ...multiplierColumns,
+    ...damageColumns,
+    
   ]
 }
 

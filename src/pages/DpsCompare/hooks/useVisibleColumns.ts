@@ -4,7 +4,7 @@ import { useState } from 'react'
  * 列可见性在 localStorage 中的存储键前缀
  * 列清单发生变化时应递增版本号，避免旧记忆静默隐藏新增列
  */
-const STORAGE_PREFIX = 'delta-lab.visible-columns.v3'
+const STORAGE_PREFIX = 'delta-lab.visible-columns.v4'
 
 /** 按页面或视图标识拼出存储键，例如 delta-lab.visible-columns.v3.weapon */
 export function columnsStorageKey(key: string): string {

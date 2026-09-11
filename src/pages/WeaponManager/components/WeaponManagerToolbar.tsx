@@ -27,14 +27,12 @@ export default function WeaponManagerToolbar({
 }: WeaponManagerToolbarProps) {
   return (
     <Space wrap>
+    
       {/* 新增/编辑：低风险，保持主题主色 */}
       <Button type="primary" onClick={onCreate}>
-        导入武器
+        导入枪械
       </Button>
-      {/* 导出：只读不写，绿色表示无风险 */}
-      <Button color="green" variant="solid" onClick={onExportExcel}>
-        导出Excel
-      </Button>
+     
       <Button color="green" variant="solid" onClick={onExportJson}>
         导出JSON
       </Button>
@@ -44,15 +42,20 @@ export default function WeaponManagerToolbar({
           导入JSON覆盖
         </Button>
       </Tooltip>
-      {/* 追加导入：黄色中等风险，同名覆盖、新名追加 */}
-      <Button color="orange" variant="solid" onClick={() => onImport('excel-append')}>
-        导入Excel追加
+       {/* 导出：只读不写，绿色表示无风险 */}
+      <Button color="green" variant="solid" onClick={onExportExcel}>
+        导出Excel
       </Button>
       <Tooltip title={OVERWRITE_HINT}>
         <Button color="danger" variant="solid" onClick={() => onImport('excel-replace')}>
           导入Excel覆盖
         </Button>
       </Tooltip>
+      {/* 追加导入：黄色中等风险，同名覆盖、新名追加 */}
+      <Button color="orange" variant="solid" onClick={() => onImport('excel-append')}>
+        导入Excel追加
+      </Button>
+      
     </Space>
   )
 }

@@ -1,4 +1,4 @@
-import type { Weapon, WeaponRange } from '@/types/weapon'
+import type { Weapon } from '@/types/weapon'
 import { getRangeMultiplier } from '@/utils/dps'
 
 /** 视图类型：按武器（一行一把武器）或按射程（一行一段射程） */
@@ -6,7 +6,7 @@ export type ViewMode = 'weapon' | 'range'
 
 /** 视图切换选项，顺序即界面顺序 */
 export const VIEW_OPTIONS: ReadonlyArray<{ label: string; value: ViewMode }> = [
-  { label: '按武器', value: 'weapon' },
+  { label: '按枪械', value: 'weapon' },
   { label: '按射程', value: 'range' },
 ]
 
@@ -31,21 +31,6 @@ export interface StatsRow extends Weapon {
   segment: SegmentRange
   /** 该行生效的伤害倍率，伤害与 DPS 列都按它计算 */
   multiplier: number
-}
-
-/**
- * 把射程分段列表拼成可读文本（仅按武器视图使用）
- * 每段用自身 start 与下一段 start 组成 [start, end)；末段无终点，显示「N米以上」
- * 例如 1倍(0-27米)｜0.9倍(27-35米)｜0.7倍(54米以上)
- */
-export function formatRange(ranges: WeaponRange[]): string {
-  return ranges
-    .map((item, index) => {
-      const end = ranges[index + 1]?.start
-      const span = end === undefined ? `${item.start}米以上` : `${item.start}-${end}米`
-      return `${item.multiplier}倍(${span})`
-    })
-    .join('｜')
 }
 
 /** 按武器视图：一把武器一行，倍率取输入距离对应的倍率 */
@@ -94,4 +79,13 @@ function isCovering(segment: SegmentRange, distance: number): boolean {
 export function filterRows(rows: StatsRow[], distance: number, enabled: boolean): StatsRow[] {
   if (!enabled) return rows
   return rows.filter((row) => isCovering(row.segment, distance))
+}
+
+/**
+ * 按武器名过滤行：只保留名称已被勾选的行
+ * 勾选集合来自「按武器名过滤」面板，两个视图共用同一份集合；
+ * 集合为空表示一把武器都未勾选，此时结果为空表（行全部隐藏）
+ */
+export function filterRowsByName(rows: StatsRow[], selectedNames: readonly string[]): StatsRow[] {
+  return rows.filter((row) => selectedNames.includes(row.name))
 }

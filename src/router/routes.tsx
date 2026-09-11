@@ -13,5 +13,5 @@ export interface AppRoute {
  */
 export const appRoutes: AppRoute[] = [
   { path: '/dps-compare', label: 'DPS对比', element: <DpsCompare /> },
-  { path: '/weapon-manager', label: '武器管理', element: <WeaponManager /> },
+  { path: '/weapon-manager', label: '枪械管理', element: <WeaponManager /> },
 ]

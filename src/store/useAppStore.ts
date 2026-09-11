@@ -8,6 +8,29 @@ export type ThemeMode = 'light' | 'dark'
 /** 武器列表在 localStorage 中的存储键；射程段结构由 max 改为 start 后升到 v2 */
 const WEAPONS_STORAGE_KEY = 'delta-lab.weapons.v2'
 
+/** 主题模式在 localStorage 中的存储键 */
+const THEME_STORAGE_KEY = 'delta-lab.theme'
+
+/** 保存主题模式；隐私模式等写入失败场景静默忽略，仅当次会话生效 */
+function writeThemeMode(mode: ThemeMode): void {
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, mode)
+  } catch {
+    // 忽略写入失败
+  }
+}
+
+/** 读取主题模式；key 不存在、值非法或读取失败时回退为亮色 */
+function readThemeMode(): ThemeMode {
+  try {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY)
+    if (saved === 'light' || saved === 'dark') return saved
+  } catch {
+    // 读取失败按默认值处理
+  }
+  return 'dark'
+}
+
 /** 结构校验：只判断必要字段，避免 localStorage 脏数据导致页面崩溃 */
 function isWeaponRecord(value: unknown): value is WeaponRecord {
   if (typeof value !== 'object' || value === null) return false
@@ -79,11 +102,16 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set) => ({
-  themeMode: 'light',
+  // 初始值直接读取 localStorage，保证首帧即渲染正确主题、刷新后不回退
+  themeMode: readThemeMode(),
   sidebarCollapsed: false,
   weapons: readWeapons(),
   toggleThemeMode: () =>
-    set((state) => ({ themeMode: state.themeMode === 'light' ? 'dark' : 'light' })),
+    set((state) => {
+      const next: ThemeMode = state.themeMode === 'light' ? 'dark' : 'light'
+      writeThemeMode(next)
+      return { themeMode: next }
+    }),
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
   addWeapon: (weapon) =>
     set((state) => {
