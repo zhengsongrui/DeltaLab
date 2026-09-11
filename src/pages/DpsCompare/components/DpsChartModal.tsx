@@ -54,7 +54,7 @@ export default function DpsChartModal({ open, weapons, weights, onCancel }: DpsC
         formatter: (params: any) => {
           const list = Array.isArray(params) ? params : [params]
           const distance = list[0]?.value?.[0] ?? 0
-          const lines = [`距离：${distance} 米`]
+          const lines = [`距离：${distance} 米后`]
           list.forEach((item: any) => {
             const weapon = weapons.find((entry) => entry.name === item.seriesName)
             const multiplier = weapon ? getRangeMultiplier(weapon, distance) : 0

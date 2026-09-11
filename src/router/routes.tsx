@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import DpsCompare from '@/pages/DpsCompare'
+import FireIntervalCompare from '@/pages/FireIntervalCompare'
 import WeaponManager from '@/pages/WeaponManager'
 
 export interface AppRoute {
@@ -13,5 +14,6 @@ export interface AppRoute {
  */
 export const appRoutes: AppRoute[] = [
   { path: '/dps-compare', label: 'DPS对比', element: <DpsCompare /> },
+  { path: '/fire-interval', label: '射击间隔对比', element: <FireIntervalCompare /> },
   { path: '/weapon-manager', label: '枪械管理', element: <WeaponManager /> },
 ]

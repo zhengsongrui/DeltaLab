@@ -1,12 +1,18 @@
-import type { Weapon } from '@/types/weapon'
+import type { WeaponSeed } from '@/types/weapon'
 
 /**
- * 枪械静态数据
+ * 枪械静态数据（内置种子）
  * 手工维护，后续可直接增删数组项或替换数值，页面无需改动。
+ *
+ * key 是跨版本对齐同一条目的稳定标识，维护约定：
+ * - 新增条目：补一个全新的 key
+ * - 修改数值或名称：沿用原 key
+ * - 不要复用或改动已有 key，否则升级时会被当作「删除 + 新增」处理
  */
-export const weapons: readonly Weapon[] = [
+export const weapons: readonly WeaponSeed[] = [
   {
     "name": "ASVAL - 海啸",
+    "key": "asval-tsunami",
     "damage": {
       "base": 28,
       "armor": 44
@@ -35,6 +41,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "MK4 - 1轮3连发 - 赛季弹",
+    "key": "mk4-burst1-season",
     "damage": {
       "base": 34,
       "armor": 35
@@ -67,6 +74,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "MK4 - 1轮3连发",
+    "key": "mk4-burst1",
     "damage": {
       "base": 34,
       "armor": 35
@@ -99,6 +107,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "汤姆逊 - 满改 - 4弹",
+    "key": "thompson-full-4",
     "damage": {
       "base": 37,
       "armor": 37
@@ -131,6 +140,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "汤姆逊 - 满改 - 5弹",
+    "key": "thompson-full-5",
     "damage": {
       "base": 31.5,
       "armor": 37
@@ -163,6 +173,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "SVCH - 前三发",
+    "key": "svch-first-three",
     "damage": {
       "base": 47,
       "armor": 46
@@ -187,6 +198,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "MK4 - 2轮3连发 - 赛季弹",
+    "key": "mk4-burst2-season",
     "damage": {
       "base": 34,
       "armor": 35
@@ -219,6 +231,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "MK4 - 2轮3连发",
+    "key": "mk4-burst2",
     "damage": {
       "base": 34,
       "armor": 35
@@ -251,6 +264,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "MK4 - 3轮3连发 - 赛季弹",
+    "key": "mk4-burst3-season",
     "damage": {
       "base": 34,
       "armor": 35
@@ -283,6 +297,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "MK4 - 3轮3连发",
+    "key": "mk4-burst3",
     "damage": {
       "base": 34,
       "armor": 35
@@ -315,6 +330,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "MK47 - 鏖战",
+    "key": "mk47-attrition",
     "damage": {
       "base": 46,
       "armor": 47
@@ -343,6 +359,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "MK4 - 4轮3连发 - 赛季弹",
+    "key": "mk4-burst4-season",
     "damage": {
       "base": 34,
       "armor": 35
@@ -375,6 +392,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "MK4 - 4轮3连发",
+    "key": "mk4-burst4",
     "damage": {
       "base": 34,
       "armor": 35
@@ -407,6 +425,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "SVCH - 无爆发枪机",
+    "key": "svch-no-burst",
     "damage": {
       "base": 47,
       "armor": 46
@@ -431,6 +450,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "ASH - 歼灭",
+    "key": "ash-annihilation",
     "damage": {
       "base": 56,
       "armor": 55
@@ -455,6 +475,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "K437 - 长管",
+    "key": "k437-long",
     "damage": {
       "base": 36,
       "armor": 35
@@ -483,6 +504,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "M7 - 堤风",
+    "key": "m7-dike-wind",
     "damage": {
       "base": 39,
       "armor": 42
@@ -511,6 +533,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "AUG - 集成3倍",
+    "key": "aug-integrated-3x",
     "damage": {
       "base": 32,
       "armor": 35
@@ -539,6 +562,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "93R - 鼬鼠",
+    "key": "r93-weasel",
     "damage": {
       "base": 34,
       "armor": 32
@@ -567,6 +591,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "ASH - 战斧",
+    "key": "ash-battle-axe",
     "damage": {
       "base": 75,
       "armor": 40
@@ -595,6 +620,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "K416 - 长管 - 轻语消音",
+    "key": "k416-long-whisper",
     "damage": {
       "base": 31,
       "armor": 35
@@ -623,6 +649,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "MDR - 长管",
+    "key": "mdr-long",
     "damage": {
       "base": 41,
       "armor": 43
@@ -651,6 +678,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "腾龙 - 长管 - 高导",
+    "key": "tenglong-long-high-guide",
     "damage": {
       "base": 35,
       "armor": 38
@@ -679,6 +707,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "KC17 - 短管",
+    "key": "kc17-short",
     "damage": {
       "base": 31,
       "armor": 48
@@ -707,6 +736,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "M4A1 - 长管",
+    "key": "m4a1-long",
     "damage": {
       "base": 31,
       "armor": 33
@@ -735,6 +765,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "G3 - 短管",
+    "key": "g3-short",
     "damage": {
       "base": 39,
       "armor": 42
@@ -763,6 +794,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "AK47 - 腰射",
+    "key": "ak47-hip-fire",
     "damage": {
       "base": 40,
       "armor": 42
@@ -791,6 +823,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "P90 - 长管 - 回声消音",
+    "key": "p90-long-echo",
     "damage": {
       "base": 32,
       "armor": 35
@@ -819,6 +852,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "MP7 - 长管 - 回声消音",
+    "key": "mp7-long-echo",
     "damage": {
       "base": 32,
       "armor": 28
@@ -851,6 +885,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "QCQ171 - 长管 - 回声消音",
+    "key": "qcq171-long-echo",
     "damage": {
       "base": 36,
       "armor": 33
@@ -887,6 +922,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "QJB201 - 短管 - 高导 - 轻语消音",
+    "key": "qjb201-short-high-whisper",
     "damage": {
       "base": 32,
       "armor": 38
@@ -915,6 +951,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "QJB201 - 短管 - 轻语消音",
+    "key": "qjb201-short-whisper",
     "damage": {
       "base": 32,
       "armor": 38
@@ -943,6 +980,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "M249 - 多口消音",
+    "key": "m249-multi-suppressor",
     "damage": {
       "base": 30,
       "armor": 38
@@ -967,6 +1005,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "PKM - 长管",
+    "key": "pkm-long",
     "damage": {
       "base": 45,
       "armor": 42
@@ -995,6 +1034,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "M14 - 长管",
+    "key": "m14-long",
     "damage": {
       "base": 39,
       "armor": 41
@@ -1023,6 +1063,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "SCARH - 长管",
+    "key": "scarh-long",
     "damage": {
       "base": 40,
       "armor": 41
@@ -1051,6 +1092,7 @@ export const weapons: readonly Weapon[] = [
   },
   {
     "name": "Vector - 长管 - 回声消音",
+    "key": "vector-long-echo",
     "damage": {
       "base": 32,
       "armor": 28
@@ -1084,6 +1126,270 @@ export const weapons: readonly Weapon[] = [
         "multiplier": 0.45
       }
     ]
-  }
+  },
+  {
+    "name": "MK4 - 1轮3连发 - 回声 - 赛季弹",
+    "key": "mk4-echo-burst1-season",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 1172,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.9
+      },
+      {
+        "start": 48,
+        "multiplier": 0.8
+      },
+      {
+        "start": 64,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2.5,
+      "chest": 1.25,
+      "abdomen": 0.9,
+      "limbs": 0.45
+    }
+  },
+  {
+    "name": "MK4 - 1轮3连发 - 回声",
+    "key": "mk4-echo-burst1",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 1172,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.9
+      },
+      {
+        "start": 48,
+        "multiplier": 0.8
+      },
+      {
+        "start": 64,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2,
+      "chest": 1,
+      "abdomen": 1,
+      "limbs": 0.5
+    }
+  },
+  {
+    "name": "MK4 - 2轮3连发 - 回声 - 赛季弹",
+    "key": "mk4-echo-burst2-season",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 880,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.9
+      },
+      {
+        "start": 48,
+        "multiplier": 0.8
+      },
+      {
+        "start": 64,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2.5,
+      "chest": 1.25,
+      "abdomen": 0.9,
+      "limbs": 0.45
+    }
+  },
+  {
+    "name": "MK4 - 2轮3连发 - 回声",
+    "key": "mk4-echo-burst2",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 880,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.9
+      },
+      {
+        "start": 48,
+        "multiplier": 0.8
+      },
+      {
+        "start": 64,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2,
+      "chest": 1,
+      "abdomen": 1,
+      "limbs": 0.5
+    }
+  },
+  {
+    "name": "MK4 - 3轮3连发 - 回声 - 赛季弹",
+    "key": "mk4-echo-burst3-season",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 840,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.9
+      },
+      {
+        "start": 48,
+        "multiplier": 0.8
+      },
+      {
+        "start": 64,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2.5,
+      "chest": 1.25,
+      "abdomen": 0.9,
+      "limbs": 0.45
+    }
+  },
+  {
+    "name": "MK4 - 3轮3连发 - 回声",
+    "key": "mk4-echo-burst3",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 840,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.9
+      },
+      {
+        "start": 48,
+        "multiplier": 0.8
+      },
+      {
+        "start": 64,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2,
+      "chest": 1,
+      "abdomen": 1,
+      "limbs": 0.5
+    }
+  },
+  {
+    "name": "MK4 - 4轮3连发 - 回声 - 赛季弹",
+    "key": "mk4-echo-burst4-season",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 820,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.9
+      },
+      {
+        "start": 48,
+        "multiplier": 0.8
+      },
+      {
+        "start": 64,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2.5,
+      "chest": 1.25,
+      "abdomen": 0.9,
+      "limbs": 0.45
+    }
+  },
+  {
+    "name": "MK4 - 4轮3连发 - 回声",
+    "key": "mk4-echo-burst4",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 820,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.9
+      },
+      {
+        "start": 48,
+        "multiplier": 0.8
+      },
+      {
+        "start": 64,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2,
+      "chest": 1,
+      "abdomen": 1,
+      "limbs": 0.5
+    }
+  },
 ]
 

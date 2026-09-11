@@ -1,0 +1,258 @@
+[
+  {
+    "name": "MK4 - 1轮3连发 - 回声 - 赛季弹",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 1172,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.9
+      },
+      {
+        "start": 48,
+        "multiplier": 0.8
+      },
+      {
+        "start": 64,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2.5,
+      "chest": 1.25,
+      "abdomen": 0.9,
+      "limbs": 0.45
+    }
+  },
+  {
+    "name": "MK4 - 1轮3连发 - 回声",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 1172,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.9
+      },
+      {
+        "start": 48,
+        "multiplier": 0.8
+      },
+      {
+        "start": 64,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2,
+      "chest": 1,
+      "abdomen": 1,
+      "limbs": 0.5
+    }
+  },
+  {
+    "name": "MK4 - 2轮3连发 - 回声 - 赛季弹",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 880,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.9
+      },
+      {
+        "start": 48,
+        "multiplier": 0.8
+      },
+      {
+        "start": 64,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2.5,
+      "chest": 1.25,
+      "abdomen": 0.9,
+      "limbs": 0.45
+    }
+  },
+  {
+    "name": "MK4 - 2轮3连发 - 回声",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 880,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.9
+      },
+      {
+        "start": 48,
+        "multiplier": 0.8
+      },
+      {
+        "start": 64,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2,
+      "chest": 1,
+      "abdomen": 1,
+      "limbs": 0.5
+    }
+  },
+  {
+    "name": "MK4 - 3轮3连发 - 回声 - 赛季弹",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 840,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.9
+      },
+      {
+        "start": 48,
+        "multiplier": 0.8
+      },
+      {
+        "start": 64,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2.5,
+      "chest": 1.25,
+      "abdomen": 0.9,
+      "limbs": 0.45
+    }
+  },
+  {
+    "name": "MK4 - 3轮3连发 - 回声",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 840,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.9
+      },
+      {
+        "start": 48,
+        "multiplier": 0.8
+      },
+      {
+        "start": 64,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2,
+      "chest": 1,
+      "abdomen": 1,
+      "limbs": 0.5
+    }
+  },
+  {
+    "name": "MK4 - 4轮3连发 - 回声 - 赛季弹",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 820,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.9
+      },
+      {
+        "start": 48,
+        "multiplier": 0.8
+      },
+      {
+        "start": 64,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2.5,
+      "chest": 1.25,
+      "abdomen": 0.9,
+      "limbs": 0.45
+    }
+  },
+  {
+    "name": "MK4 - 4轮3连发 - 回声",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 820,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.9
+      },
+      {
+        "start": 48,
+        "multiplier": 0.8
+      },
+      {
+        "start": 64,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2,
+      "chest": 1,
+      "abdomen": 1,
+      "limbs": 0.5
+    }
+  }
+]

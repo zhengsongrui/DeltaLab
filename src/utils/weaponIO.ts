@@ -85,9 +85,18 @@ export function weaponsToXlsxBlob(weapons: Weapon[]): Blob {
   })
 }
 
-/** 武器列表 → JSON 文本，保留 id 便于人工核对 */
+/** 武器列表 → JSON 文本，保留 id 便于人工核对，剥离升级用的内部元数据 */
 export function weaponsToJsonText(weapons: WeaponRecord[]): string {
-  return JSON.stringify(weapons, null, 2)
+  return JSON.stringify(
+    weapons.map((weapon) => ({
+      ...weapon,
+      source: undefined,
+      seedKey: undefined,
+      seedHash: undefined,
+    })),
+    null,
+    2,
+  )
 }
 
 /* ------------------------------- 导入：外部格式 → 领域模型 ------------------------------- */
@@ -257,31 +266,51 @@ export interface MergeResult {
 
 /**
  * 按名称合并导入数据与现有数据
- * 名称命中 → 沿用旧 id；新名称 → 生成新 id。
+ * 名称命中 → 沿用旧 id 与来源元数据；新名称 → 生成新 id 并标记为用户数据。
  * 导入数据内部同名时以最后一条为准，避免出现重复记录。
  */
 export function mergeWeaponsByName(current: WeaponRecord[], incoming: Weapon[]): MergeResult {
-  const idByName = new Map(current.map((item) => [item.name, item.id]))
+  const currentByName = new Map(current.map((item) => [item.name, item]))
   const incomingByName = new Map<string, Weapon>()
   for (const weapon of incoming) incomingByName.set(weapon.name, weapon)
 
-  const added = [...incomingByName.keys()].filter((name) => !idByName.has(name)).length
+  const added = [...incomingByName.keys()].filter((name) => !currentByName.has(name)).length
   const updated = incomingByName.size - added
 
-  /** 导入数据 → 记录：命中旧名称沿用旧 id，否则生成新 id */
-  const toRecord = (weapon: Weapon): WeaponRecord => ({
-    ...weapon,
-    id: idByName.get(weapon.name) ?? createWeaponId(),
-  })
+  /**
+   * 导入数据 → 记录
+   * 命中旧名称：沿用旧 id 与来源元数据，使「用户改过的内置条目」被导入覆盖后仍标记为已改动；
+   * 新名称：生成新 id 并标记为用户数据，此后不再参与内置升级覆盖
+   */
+  const toRecord = (weapon: Weapon): WeaponRecord => {
+    const existing = currentByName.get(weapon.name)
+    return existing
+      ? {
+          ...weapon,
+          id: existing.id,
+          source: existing.source,
+          seedKey: existing.seedKey,
+          seedHash: existing.seedHash,
+        }
+      : { ...weapon, id: createWeaponId(), source: 'user' }
+  }
 
   const replaced = [...incomingByName.values()].map(toRecord)
   const appended = [
-    // 现有记录：同名用导入数据替换数值、保留原 id，其余原样保留
+    // 现有记录：同名用导入数据替换数值、保留原 id 与来源元数据，其余原样保留
     ...current.map((item) => {
       const replacement = incomingByName.get(item.name)
-      return replacement ? { ...replacement, id: item.id } : item
+      return replacement
+        ? {
+            ...replacement,
+            id: item.id,
+            source: item.source,
+            seedKey: item.seedKey,
+            seedHash: item.seedHash,
+          }
+        : item
     }),
-    ...replaced.filter((item) => !idByName.has(item.name)),
+    ...replaced.filter((item) => !currentByName.has(item.name)),
   ]
 
   return { replaced, appended, added, updated, removed: current.length - updated }
