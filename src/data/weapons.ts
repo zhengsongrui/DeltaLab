@@ -39,295 +39,10 @@ export const weapons: readonly WeaponSeed[] = [
       "limbs": 0.4
     }
   },
-  {
-    "name": "MK4 - 1轮3连发 - 赛季弹",
-    "key": "mk4-burst1-season",
-    "damage": {
-      "base": 34,
-      "armor": 35
-    },
-    "fireRate": 1172,
-    "range": [
-      {
-        "start": 0,
-        "multiplier": 1
-      },
-      {
-        "start": 26,
-        "multiplier": 0.9
-      },
-      {
-        "start": 39,
-        "multiplier": 0.8
-      },
-      {
-        "start": 52,
-        "multiplier": 0.7
-      }
-    ],
-    "hitMultiplier": {
-      "head": 2.5,
-      "chest": 1.25,
-      "abdomen": 0.9,
-      "limbs": 0.45
-    }
-  },
-  {
-    "name": "MK4 - 1轮3连发",
-    "key": "mk4-burst1",
-    "damage": {
-      "base": 34,
-      "armor": 35
-    },
-    "fireRate": 1172,
-    "range": [
-      {
-        "start": 0,
-        "multiplier": 1
-      },
-      {
-        "start": 26,
-        "multiplier": 0.9
-      },
-      {
-        "start": 39,
-        "multiplier": 0.8
-      },
-      {
-        "start": 52,
-        "multiplier": 0.7
-      }
-    ],
-    "hitMultiplier": {
-      "head": 2,
-      "chest": 1,
-      "abdomen": 1,
-      "limbs": 0.5
-    }
-  },
-  {
-    "name": "汤姆逊 - 满改 - 4弹",
-    "key": "thompson-full-4",
-    "damage": {
-      "base": 37,
-      "armor": 37
-    },
-    "fireRate": 900,
-    "range": [
-      {
-        "start": 0,
-        "multiplier": 1
-      },
-      {
-        "start": 29,
-        "multiplier": 0.85
-      },
-      {
-        "start": 52,
-        "multiplier": 0.75
-      },
-      {
-        "start": 72,
-        "multiplier": 0.65
-      }
-    ],
-    "hitMultiplier": {
-      "head": 1.9,
-      "chest": 1,
-      "abdomen": 1,
-      "limbs": 0.35
-    }
-  },
-  {
-    "name": "汤姆逊 - 满改 - 5弹",
-    "key": "thompson-full-5",
-    "damage": {
-      "base": 31.5,
-      "armor": 37
-    },
-    "fireRate": 900,
-    "range": [
-      {
-        "start": 0,
-        "multiplier": 1
-      },
-      {
-        "start": 29,
-        "multiplier": 0.85
-      },
-      {
-        "start": 52,
-        "multiplier": 0.75
-      },
-      {
-        "start": 72,
-        "multiplier": 0.65
-      }
-    ],
-    "hitMultiplier": {
-      "head": 1.9,
-      "chest": 1,
-      "abdomen": 1,
-      "limbs": 0.35
-    }
-  },
-  {
-    "name": "SVCH - 前三发",
-    "key": "svch-first-three",
-    "damage": {
-      "base": 47,
-      "armor": 46
-    },
-    "fireRate": 700,
-    "range": [
-      {
-        "start": 0,
-        "multiplier": 1
-      },
-      {
-        "start": 85,
-        "multiplier": 0.9
-      }
-    ],
-    "hitMultiplier": {
-      "head": 1.9,
-      "chest": 1,
-      "abdomen": 0.9,
-      "limbs": 0.4
-    }
-  },
-  {
-    "name": "MK4 - 2轮3连发 - 赛季弹",
-    "key": "mk4-burst2-season",
-    "damage": {
-      "base": 34,
-      "armor": 35
-    },
-    "fireRate": 880,
-    "range": [
-      {
-        "start": 0,
-        "multiplier": 1
-      },
-      {
-        "start": 26,
-        "multiplier": 0.9
-      },
-      {
-        "start": 39,
-        "multiplier": 0.8
-      },
-      {
-        "start": 52,
-        "multiplier": 0.7
-      }
-    ],
-    "hitMultiplier": {
-      "head": 2.5,
-      "chest": 1.25,
-      "abdomen": 0.9,
-      "limbs": 0.45
-    }
-  },
-  {
-    "name": "MK4 - 2轮3连发",
-    "key": "mk4-burst2",
-    "damage": {
-      "base": 34,
-      "armor": 35
-    },
-    "fireRate": 880,
-    "range": [
-      {
-        "start": 0,
-        "multiplier": 1
-      },
-      {
-        "start": 26,
-        "multiplier": 0.9
-      },
-      {
-        "start": 39,
-        "multiplier": 0.8
-      },
-      {
-        "start": 52,
-        "multiplier": 0.7
-      }
-    ],
-    "hitMultiplier": {
-      "head": 2,
-      "chest": 1,
-      "abdomen": 1,
-      "limbs": 0.5
-    }
-  },
-  {
-    "name": "MK4 - 3轮3连发 - 赛季弹",
-    "key": "mk4-burst3-season",
-    "damage": {
-      "base": 34,
-      "armor": 35
-    },
-    "fireRate": 840,
-    "range": [
-      {
-        "start": 0,
-        "multiplier": 1
-      },
-      {
-        "start": 26,
-        "multiplier": 0.9
-      },
-      {
-        "start": 39,
-        "multiplier": 0.8
-      },
-      {
-        "start": 52,
-        "multiplier": 0.7
-      }
-    ],
-    "hitMultiplier": {
-      "head": 2.5,
-      "chest": 1.25,
-      "abdomen": 0.9,
-      "limbs": 0.45
-    }
-  },
-  {
-    "name": "MK4 - 3轮3连发",
-    "key": "mk4-burst3",
-    "damage": {
-      "base": 34,
-      "armor": 35
-    },
-    "fireRate": 840,
-    "range": [
-      {
-        "start": 0,
-        "multiplier": 1
-      },
-      {
-        "start": 26,
-        "multiplier": 0.9
-      },
-      {
-        "start": 39,
-        "multiplier": 0.8
-      },
-      {
-        "start": 52,
-        "multiplier": 0.7
-      }
-    ],
-    "hitMultiplier": {
-      "head": 2,
-      "chest": 1,
-      "abdomen": 1,
-      "limbs": 0.5
-    }
-  },
+  
+  
+ 
+  
   {
     "name": "MK47 - 鏖战",
     "key": "mk47-attrition",
@@ -343,7 +58,7 @@ export const weapons: readonly WeaponSeed[] = [
       },
       {
         "start": 25,
-        "multiplier": 0.85
+        "multiplier": 0.9
       },
       {
         "start": 40,
@@ -357,88 +72,26 @@ export const weapons: readonly WeaponSeed[] = [
       "limbs": 0.4
     }
   },
-  {
-    "name": "MK4 - 4轮3连发 - 赛季弹",
-    "key": "mk4-burst4-season",
+ {
+    "name": "MK47 - 余烬",
+    "key": "mk47-yujin",
     "damage": {
-      "base": 34,
-      "armor": 35
-    },
-    "fireRate": 820,
-    "range": [
-      {
-        "start": 0,
-        "multiplier": 1
-      },
-      {
-        "start": 26,
-        "multiplier": 0.9
-      },
-      {
-        "start": 39,
-        "multiplier": 0.8
-      },
-      {
-        "start": 52,
-        "multiplier": 0.7
-      }
-    ],
-    "hitMultiplier": {
-      "head": 2.5,
-      "chest": 1.25,
-      "abdomen": 0.9,
-      "limbs": 0.45
-    }
-  },
-  {
-    "name": "MK4 - 4轮3连发",
-    "key": "mk4-burst4",
-    "damage": {
-      "base": 34,
-      "armor": 35
-    },
-    "fireRate": 820,
-    "range": [
-      {
-        "start": 0,
-        "multiplier": 1
-      },
-      {
-        "start": 26,
-        "multiplier": 0.9
-      },
-      {
-        "start": 39,
-        "multiplier": 0.8
-      },
-      {
-        "start": 52,
-        "multiplier": 0.7
-      }
-    ],
-    "hitMultiplier": {
-      "head": 2,
-      "chest": 1,
-      "abdomen": 1,
-      "limbs": 0.5
-    }
-  },
-  {
-    "name": "SVCH - 无爆发枪机",
-    "key": "svch-no-burst",
-    "damage": {
-      "base": 47,
+      "base": 45,
       "armor": 46
     },
-    "fireRate": 600,
+    "fireRate": 625,
     "range": [
       {
         "start": 0,
         "multiplier": 1
       },
       {
-        "start": 85,
+        "start": 35,
         "multiplier": 0.9
+      },
+      {
+        "start": 50,
+        "multiplier": 0.7
       }
     ],
     "hitMultiplier": {
@@ -472,6 +125,36 @@ export const weapons: readonly WeaponSeed[] = [
       "abdomen": 0.9,
       "limbs": 0.45
     }
+  },
+   
+  {
+    "name": "SCARH - 长管",
+    "key": "scarh-long",
+    "damage": {
+      "base": 40,
+      "armor": 41
+    },
+    "fireRate": 585,
+    "hitMultiplier": {
+      "head": 1.9,
+      "chest": 1,
+      "abdomen": 0.9,
+      "limbs": 0.5
+    },
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 52,
+        "multiplier": 0.9
+      },
+      {
+        "start": 91,
+        "multiplier": 0.75
+      }
+    ]
   },
   {
     "name": "K437 - 长管",
@@ -821,105 +504,7 @@ export const weapons: readonly WeaponSeed[] = [
       "limbs": 0.4
     }
   },
-  {
-    "name": "P90 - 长管 - 回声消音",
-    "key": "p90-long-echo",
-    "damage": {
-      "base": 32,
-      "armor": 35
-    },
-    "fireRate": 785,
-    "range": [
-      {
-        "start": 0,
-        "multiplier": 1
-      },
-      {
-        "start": 46,
-        "multiplier": 0.85
-      },
-      {
-        "start": 78,
-        "multiplier": 0.7
-      }
-    ],
-    "hitMultiplier": {
-      "head": 1.9,
-      "chest": 1,
-      "abdomen": 0.9,
-      "limbs": 0.4
-    }
-  },
-  {
-    "name": "MP7 - 长管 - 回声消音",
-    "key": "mp7-long-echo",
-    "damage": {
-      "base": 32,
-      "armor": 28
-    },
-    "fireRate": 950,
-    "range": [
-      {
-        "start": 0,
-        "multiplier": 1
-      },
-      {
-        "start": 32,
-        "multiplier": 0.75
-      },
-      {
-        "start": 43,
-        "multiplier": 0.65
-      },
-      {
-        "start": 64,
-        "multiplier": 0.55
-      }
-    ],
-    "hitMultiplier": {
-      "head": 1.9,
-      "chest": 1,
-      "abdomen": 0.9,
-      "limbs": 0.4
-    }
-  },
-  {
-    "name": "QCQ171 - 长管 - 回声消音",
-    "key": "qcq171-long-echo",
-    "damage": {
-      "base": 36,
-      "armor": 33
-    },
-    "fireRate": 848,
-    "range": [
-      {
-        "start": 0,
-        "multiplier": 1
-      },
-      {
-        "start": 32,
-        "multiplier": 0.75
-      },
-      {
-        "start": 43,
-        "multiplier": 0.65
-      },
-      {
-        "start": 64,
-        "multiplier": 0.55
-      },
-      {
-        "start": 88,
-        "multiplier": 0.45
-      }
-    ],
-    "hitMultiplier": {
-      "head": 1.9,
-      "chest": 1,
-      "abdomen": 0.9,
-      "limbs": 0.4
-    }
-  },
+ 
   {
     "name": "QJB201 - 短管 - 高导 - 轻语消音",
     "key": "qjb201-short-high-whisper",
@@ -1032,6 +617,57 @@ export const weapons: readonly WeaponSeed[] = [
       }
     ]
   },
+
+   {
+    "name": "SVCH - 前三发",
+    "key": "svch-first-three",
+    "damage": {
+      "base": 47,
+      "armor": 46
+    },
+    "fireRate": 700,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 85,
+        "multiplier": 0.9
+      }
+    ],
+    "hitMultiplier": {
+      "head": 1.9,
+      "chest": 1,
+      "abdomen": 0.9,
+      "limbs": 0.4
+    }
+  },
+  {
+    "name": "SVCH - 无爆发枪机",
+    "key": "svch-no-burst",
+    "damage": {
+      "base": 47,
+      "armor": 46
+    },
+    "fireRate": 600,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 85,
+        "multiplier": 0.9
+      }
+    ],
+    "hitMultiplier": {
+      "head": 1.9,
+      "chest": 1,
+      "abdomen": 0.9,
+      "limbs": 0.4
+    }
+  },
   {
     "name": "M14 - 长管",
     "key": "m14-long",
@@ -1058,35 +694,6 @@ export const weapons: readonly WeaponSeed[] = [
       {
         "start": 91,
         "multiplier": 0.7
-      }
-    ]
-  },
-  {
-    "name": "SCARH - 长管",
-    "key": "scarh-long",
-    "damage": {
-      "base": 40,
-      "armor": 41
-    },
-    "fireRate": 585,
-    "hitMultiplier": {
-      "head": 1.9,
-      "chest": 1,
-      "abdomen": 0.9,
-      "limbs": 0.5
-    },
-    "range": [
-      {
-        "start": 0,
-        "multiplier": 1
-      },
-      {
-        "start": 52,
-        "multiplier": 0.9
-      },
-      {
-        "start": 91,
-        "multiplier": 0.75
       }
     ]
   },
@@ -1126,6 +733,436 @@ export const weapons: readonly WeaponSeed[] = [
         "multiplier": 0.45
       }
     ]
+  },
+   
+   {
+    "name": "P90 - 长管 - 回声消音",
+    "key": "p90-long-echo",
+    "damage": {
+      "base": 32,
+      "armor": 35
+    },
+    "fireRate": 785,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 46,
+        "multiplier": 0.85
+      },
+      {
+        "start": 78,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 1.9,
+      "chest": 1,
+      "abdomen": 0.9,
+      "limbs": 0.4
+    }
+  },
+  {
+    "name": "MP7 - 长管 - 回声消音",
+    "key": "mp7-long-echo",
+    "damage": {
+      "base": 32,
+      "armor": 28
+    },
+    "fireRate": 950,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.75
+      },
+      {
+        "start": 43,
+        "multiplier": 0.65
+      },
+      {
+        "start": 64,
+        "multiplier": 0.55
+      }
+    ],
+    "hitMultiplier": {
+      "head": 1.9,
+      "chest": 1,
+      "abdomen": 0.9,
+      "limbs": 0.4
+    }
+  },
+  {
+    "name": "QCQ171 - 长管 - 回声消音",
+    "key": "qcq171-long-echo",
+    "damage": {
+      "base": 36,
+      "armor": 33
+    },
+    "fireRate": 848,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 32,
+        "multiplier": 0.75
+      },
+      {
+        "start": 43,
+        "multiplier": 0.65
+      },
+      {
+        "start": 64,
+        "multiplier": 0.55
+      },
+      {
+        "start": 88,
+        "multiplier": 0.45
+      }
+    ],
+    "hitMultiplier": {
+      "head": 1.9,
+      "chest": 1,
+      "abdomen": 0.9,
+      "limbs": 0.4
+    }
+  },
+  {
+    "name": "汤姆逊 - 满改 - 4弹",
+    "key": "thompson-full-4",
+    "damage": {
+      "base": 37,
+      "armor": 37
+    },
+    "fireRate": 900,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 29,
+        "multiplier": 0.85
+      },
+      {
+        "start": 52,
+        "multiplier": 0.75
+      },
+      {
+        "start": 72,
+        "multiplier": 0.65
+      }
+    ],
+    "hitMultiplier": {
+      "head": 1.9,
+      "chest": 1,
+      "abdomen": 1,
+      "limbs": 0.35
+    }
+  },
+  {
+    "name": "汤姆逊 - 满改 - 5弹",
+    "key": "thompson-full-5",
+    "damage": {
+      "base": 31.5,
+      "armor": 37
+    },
+    "fireRate": 900,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 29,
+        "multiplier": 0.85
+      },
+      {
+        "start": 52,
+        "multiplier": 0.75
+      },
+      {
+        "start": 72,
+        "multiplier": 0.65
+      }
+    ],
+    "hitMultiplier": {
+      "head": 1.9,
+      "chest": 1,
+      "abdomen": 1,
+      "limbs": 0.35
+    }
+  },
+  {
+    "name": "MK4 - 1轮3连发 - 赛季弹",
+    "key": "mk4-burst1-season",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 1172,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 26,
+        "multiplier": 0.9
+      },
+      {
+        "start": 39,
+        "multiplier": 0.8
+      },
+      {
+        "start": 52,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2.5,
+      "chest": 1.25,
+      "abdomen": 0.9,
+      "limbs": 0.45
+    }
+  },
+  {
+    "name": "MK4 - 1轮3连发",
+    "key": "mk4-burst1",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 1172,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 26,
+        "multiplier": 0.9
+      },
+      {
+        "start": 39,
+        "multiplier": 0.8
+      },
+      {
+        "start": 52,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2,
+      "chest": 1,
+      "abdomen": 1,
+      "limbs": 0.5
+    }
+  },
+  {
+    "name": "MK4 - 2轮3连发 - 赛季弹",
+    "key": "mk4-burst2-season",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 880,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 26,
+        "multiplier": 0.9
+      },
+      {
+        "start": 39,
+        "multiplier": 0.8
+      },
+      {
+        "start": 52,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2.5,
+      "chest": 1.25,
+      "abdomen": 0.9,
+      "limbs": 0.45
+    }
+  },
+  {
+    "name": "MK4 - 2轮3连发",
+    "key": "mk4-burst2",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 880,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 26,
+        "multiplier": 0.9
+      },
+      {
+        "start": 39,
+        "multiplier": 0.8
+      },
+      {
+        "start": 52,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2,
+      "chest": 1,
+      "abdomen": 1,
+      "limbs": 0.5
+    }
+  },
+  {
+    "name": "MK4 - 3轮3连发 - 赛季弹",
+    "key": "mk4-burst3-season",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 840,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 26,
+        "multiplier": 0.9
+      },
+      {
+        "start": 39,
+        "multiplier": 0.8
+      },
+      {
+        "start": 52,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2.5,
+      "chest": 1.25,
+      "abdomen": 0.9,
+      "limbs": 0.45
+    }
+  },
+  {
+    "name": "MK4 - 3轮3连发",
+    "key": "mk4-burst3",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 840,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 26,
+        "multiplier": 0.9
+      },
+      {
+        "start": 39,
+        "multiplier": 0.8
+      },
+      {
+        "start": 52,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2,
+      "chest": 1,
+      "abdomen": 1,
+      "limbs": 0.5
+    }
+  },
+   {
+    "name": "MK4 - 4轮3连发 - 赛季弹",
+    "key": "mk4-burst4-season",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 820,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 26,
+        "multiplier": 0.9
+      },
+      {
+        "start": 39,
+        "multiplier": 0.8
+      },
+      {
+        "start": 52,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2.5,
+      "chest": 1.25,
+      "abdomen": 0.9,
+      "limbs": 0.45
+    }
+  },
+  {
+    "name": "MK4 - 4轮3连发",
+    "key": "mk4-burst4",
+    "damage": {
+      "base": 34,
+      "armor": 35
+    },
+    "fireRate": 820,
+    "range": [
+      {
+        "start": 0,
+        "multiplier": 1
+      },
+      {
+        "start": 26,
+        "multiplier": 0.9
+      },
+      {
+        "start": 39,
+        "multiplier": 0.8
+      },
+      {
+        "start": 52,
+        "multiplier": 0.7
+      }
+    ],
+    "hitMultiplier": {
+      "head": 2,
+      "chest": 1,
+      "abdomen": 1,
+      "limbs": 0.5
+    }
   },
   {
     "name": "MK4 - 1轮3连发 - 回声 - 赛季弹",
