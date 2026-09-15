@@ -1,7 +1,9 @@
 import { create } from 'zustand'
 import { weapons as seedWeapons } from '@/data/weapons'
 import type { Weapon, WeaponRecord } from '@/types/weapon'
+import { isWeaponFireMode } from '@/types/weapon'
 import { createWeaponId } from '@/utils/weaponId'
+import { withFireDefaults } from '@/utils/weaponFire'
 import { mergeWithSeed } from '@/utils/weaponSeed'
 
 export type ThemeMode = 'light' | 'dark'
@@ -54,7 +56,11 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
-/** 结构校验：只判断必要字段，避免 localStorage 脏数据导致页面崩溃 */
+/**
+ * 结构校验：只判断必要字段，避免 localStorage 脏数据导致页面崩溃
+ * 开火参数为后加字段，旧数据里不存在，因此允许缺失（缺省值由 withFireDefaults 统一补齐），
+ * 一旦存在则必须是合法值；反之会把整份旧记录判为非法，导致用户数据被整体丢弃。
+ */
 function isWeaponRecord(value: unknown): value is WeaponRecord {
   if (!isPlainObject(value)) return false
   const record = value as Partial<WeaponRecord>
@@ -65,6 +71,9 @@ function isWeaponRecord(value: unknown): value is WeaponRecord {
     (record.seedKey === undefined || typeof record.seedKey === 'string') &&
     (record.seedHash === undefined || typeof record.seedHash === 'string') &&
     typeof record.fireRate === 'number' &&
+    (record.fireMode === undefined || isWeaponFireMode(record.fireMode)) &&
+    (record.minShotInterval === undefined || typeof record.minShotInterval === 'number') &&
+    (record.burstSize === undefined || typeof record.burstSize === 'number') &&
     typeof record.damage?.base === 'number' &&
     typeof record.damage?.armor === 'number' &&
     Array.isArray(record.range) &&
@@ -109,7 +118,8 @@ function readWeapons(): WeaponRecord[] {
           Array.isArray(removedKeys) &&
           removedKeys.every((key) => typeof key === 'string')
         ) {
-          stored = { records, removedKeys }
+          // 补齐旧数据缺失的开火参数，保证后续计算与展示拿到的是完整结构
+          stored = { records: records.map((record) => withFireDefaults(record)), removedKeys }
         }
       }
     }

@@ -4,9 +4,14 @@
  * Excel 采用扁平列布局：射程按顺序展平为「射程N距离 / 射程N倍率」，空列忽略；
  * 射程列组固定在最后一组（紧跟四个部位倍率），距离即领域模型中的 start（段起点），
  * 末段没有下一段，天然表达「无终点」。
+ *
+ * 开火参数（开火模式 / 最短射击间隔 / 一轮发数）为后加列：导出写中文标签便于人工核对，
+ * 导入时三列均可缺省——缺省值交给 withFireDefaults 统一补齐，保证旧版导出的文件仍能导入。
  */
 import * as XLSX from 'xlsx'
-import type { Weapon, WeaponRange, WeaponRecord } from '@/types/weapon'
+import type { Weapon, WeaponFireMode, WeaponRange, WeaponRecord } from '@/types/weapon'
+import { WEAPON_FIRE_MODE_LABELS, WEAPON_FIRE_MODES } from '@/types/weapon'
+import { withFireDefaults } from '@/utils/weaponFire'
 import { createWeaponId } from '@/utils/weaponId'
 
 /** Excel 最多承载的射程段数，超出部分导出时忽略 */
@@ -17,7 +22,10 @@ const COLUMNS = {
   name: '枪械名称',
   base: '基础伤害',
   armor: '护甲伤害',
+  fireMode: '开火模式',
   fireRate: '射速RPM',
+  minShotInterval: '最短射击间隔ms',
+  burstSize: '一轮发数',
   head: '头部倍率',
   chest: '胸部倍率',
   abdomen: '腹部倍率',
@@ -37,7 +45,10 @@ const SHEET_HEADER: string[] = [
   COLUMNS.name,
   COLUMNS.base,
   COLUMNS.armor,
+  COLUMNS.fireMode,
   COLUMNS.fireRate,
+  COLUMNS.minShotInterval,
+  COLUMNS.burstSize,
   COLUMNS.head,
   COLUMNS.chest,
   COLUMNS.abdomen,
@@ -60,7 +71,11 @@ export function weaponsToSheetRows(weapons: Weapon[]): SheetRow[] {
       [COLUMNS.name]: weapon.name,
       [COLUMNS.base]: weapon.damage.base,
       [COLUMNS.armor]: weapon.damage.armor,
+      // 开火模式导出为中文标签，方便人工核对与修改
+      [COLUMNS.fireMode]: WEAPON_FIRE_MODE_LABELS[weapon.fireMode],
       [COLUMNS.fireRate]: weapon.fireRate,
+      [COLUMNS.minShotInterval]: weapon.minShotInterval,
+      [COLUMNS.burstSize]: weapon.burstSize,
       [COLUMNS.head]: weapon.hitMultiplier.head,
       [COLUMNS.chest]: weapon.hitMultiplier.chest,
       [COLUMNS.abdomen]: weapon.hitMultiplier.abdomen,
@@ -149,18 +164,37 @@ function parseRangeRow(row: SheetRow, label: string): WeaponRange[] {
   return normalizeRange(segments, label)
 }
 
+/**
+ * 解析开火模式：中文标签与枚举值都接受，方便人工填表与程序导出互通
+ * 空值按「全自动」处理（旧版导出的文件没有该列），填了其它内容则报错
+ */
+function parseFireMode(value: unknown, label: string): WeaponFireMode {
+  if (value === undefined || value === null || value === '') return 'auto'
+  const text = typeof value === 'string' ? value.trim() : value
+  const matched = WEAPON_FIRE_MODES.find(
+    (mode) => mode === text || WEAPON_FIRE_MODE_LABELS[mode] === text,
+  )
+  if (!matched) throw new Error(`${label} 只能是 全自动 / 连发 / 单发`)
+  return matched
+}
+
 /** 解析一行武器数据，label 用于错误提示定位（Excel 行号或数据序号） */
 function parseRow(row: SheetRow, label: string): Weapon {
   const rawName = row[COLUMNS.name]
   const name = typeof rawName === 'string' ? rawName.trim() : ''
   if (!name) throw new Error(`${label} 缺少「${COLUMNS.name}」`)
-  return {
+  const parsed: Weapon = {
     name,
     damage: {
       base: requireNumber(row[COLUMNS.base], `${label}「${COLUMNS.base}」`),
       armor: requireNumber(row[COLUMNS.armor], `${label}「${COLUMNS.armor}」`),
     },
+    fireMode: parseFireMode(row[COLUMNS.fireMode], `${label}「${COLUMNS.fireMode}」`),
     fireRate: requireNumber(row[COLUMNS.fireRate], `${label}「${COLUMNS.fireRate}」`),
+    // 两列允许缺省：全自动 / 单发的最短射击间隔、非连发的一轮发数由 withFireDefaults 补齐
+    minShotInterval:
+      optionalNumber(row[COLUMNS.minShotInterval], `${label}「${COLUMNS.minShotInterval}」`) ?? 0,
+    burstSize: optionalNumber(row[COLUMNS.burstSize], `${label}「${COLUMNS.burstSize}」`) ?? 0,
     range: parseRangeRow(row, label),
     hitMultiplier: {
       head: requireNumber(row[COLUMNS.head], `${label}「${COLUMNS.head}」`),
@@ -169,6 +203,7 @@ function parseRow(row: SheetRow, label: string): Weapon {
       limbs: requireNumber(row[COLUMNS.limbs], `${label}「${COLUMNS.limbs}」`),
     },
   }
+  return withFireDefaults(parsed)
 }
 
 /** 解析 xlsx 二进制为首个工作表的数据行 */
@@ -219,13 +254,17 @@ function parseJsonWeapon(value: unknown, label: string): Weapon {
   const hitMultiplier = value.hitMultiplier
   if (!isRecord(damage)) throw new Error(`${label} 缺少 damage`)
   if (!isRecord(hitMultiplier)) throw new Error(`${label} 缺少 hitMultiplier`)
-  return {
+  const parsed: Weapon = {
     name,
     damage: {
       base: requireNumber(damage.base, `${label} damage.base`),
       armor: requireNumber(damage.armor, `${label} damage.armor`),
     },
+    fireMode: parseFireMode(value.fireMode, `${label} fireMode`),
     fireRate: requireNumber(value.fireRate, `${label} fireRate`),
+    // 开火参数允许缺省，保证旧版导出的 JSON 仍可导入
+    minShotInterval: optionalNumber(value.minShotInterval, `${label} minShotInterval`) ?? 0,
+    burstSize: optionalNumber(value.burstSize, `${label} burstSize`) ?? 0,
     range: parseJsonRange(value.range, label),
     hitMultiplier: {
       head: requireNumber(hitMultiplier.head, `${label} hitMultiplier.head`),
@@ -234,6 +273,7 @@ function parseJsonWeapon(value: unknown, label: string): Weapon {
       limbs: requireNumber(hitMultiplier.limbs, `${label} hitMultiplier.limbs`),
     },
   }
+  return withFireDefaults(parsed)
 }
 
 /** JSON 文本 → 武器列表；只接受数组结构，逐条校验 */

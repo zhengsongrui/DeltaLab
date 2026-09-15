@@ -13,7 +13,10 @@ import type { ColumnGroup } from './ColumnSelector'
 interface DpsChartModalProps {
   /** 弹窗是否可见，由页面控制 */
   open: boolean
-  /** 可选枪械清单，来自页面的武器列表 */
+  /**
+   * 可选枪械清单，已由页面按连发轮数展开且不依赖距离
+   * 连发枪械的 name 已带上轮次标识（如「AK47 2轮3连发」），图表以名称区分同枪不同轮次的曲线
+   */
   weapons: readonly Weapon[]
   /** 综合 DPS 的命中权重，与表格共用，保证口径一致 */
   weights: HitWeight
@@ -23,6 +26,7 @@ interface DpsChartModalProps {
 
 /**
  * 图表对比弹窗：对比多把枪械的 DPS 随距离变化曲线
+ * 候选枪械由页面按当前连发轮数展开（名称含轮次标识），因此同一把连发枪械的不同轮次可各画一条曲线；
  * 单选曲线类型（默认综合 DPS），勾选任意枪械（默认不选）即为其叠加一条同类型折线；
  * 折线采用阶梯模式，DPS 在射程段边界垂直跳变，直观呈现断崖式衰减。
  */

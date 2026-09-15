@@ -1,6 +1,10 @@
 import { useEffect } from "react";
-import { Button, Form, Input, InputNumber, Modal, Space } from "antd";
-import type { HitboxPart, Weapon, WeaponRange, WeaponRecord } from "@/types/weapon";
+import type { CSSProperties } from "react";
+import { Button, Form, Input, InputNumber, Modal, Segmented, Space, Typography } from "antd";
+import type { HitboxPart, Weapon, WeaponFireMode, WeaponRange, WeaponRecord } from "@/types/weapon";
+import { WEAPON_FIRE_MODE_LABELS, WEAPON_FIRE_MODES } from "@/types/weapon";
+import { getBurstGapMs, getBurstRoundRpm, round1, round2 } from "@/utils/burstTiming";
+import { deriveMinShotInterval } from "@/utils/weaponFire";
 
 /**
  * 表单内的射程段：只填终点
@@ -17,14 +21,30 @@ interface WeaponFormValues extends Omit<Weapon, "range"> {
   range: RangeFormItem[];
 }
 
-/** 弹窗打开时的默认值：单段射程（无终点、一直生效），各部位倍率取满额 1 */
+/**
+ * 弹窗打开时的默认值：单段射程（无终点、一直生效），各部位倍率取满额 1
+ * 开火模式默认全自动，其最短射击间隔由射速换算、提交时才写入，故初值填 0 占位；
+ * 一轮发数只在切到连发时使用，默认给一个常见的 3 发。
+ */
 const INITIAL_VALUES: WeaponFormValues = {
   name: "",
   damage: { base: 0, armor: 0 },
+  fireMode: "auto",
   fireRate: 1,
+  minShotInterval: 0,
+  burstSize: 3,
   range: [{ multiplier: 1 }],
   hitMultiplier: { head: 1, chest: 1, abdomen: 1, limbs: 1 },
 };
+
+/** 开火模式切换项：文案与取值都来自领域模型，避免文案散落 */
+const FIRE_MODE_OPTIONS = WEAPON_FIRE_MODES.map((mode) => ({
+  label: WEAPON_FIRE_MODE_LABELS[mode],
+  value: mode,
+}));
+
+/** 派生值提示文案的统一排版：小字号、整行展示，配合 type="secondary" 使用 */
+const HINT_STYLE: CSSProperties = { display: "block", fontSize: 12, marginBottom: 16 };
 
 /**
  * 领域模型 → 表单值（编辑回填用）
@@ -34,7 +54,10 @@ function toFormValues(weapon: Weapon): WeaponFormValues {
   return {
     name: weapon.name,
     damage: { ...weapon.damage },
+    fireMode: weapon.fireMode,
     fireRate: weapon.fireRate,
+    minShotInterval: weapon.minShotInterval,
+    burstSize: weapon.burstSize,
     range: weapon.range.map((segment, index) => {
       const next = weapon.range[index + 1];
       return next
@@ -96,8 +119,38 @@ export default function WeaponFormModal({
   const [form] = Form.useForm<WeaponFormValues>();
   /** 实时射程段，用于渲染各段的只读起点 */
   const rangeValues = Form.useWatch("range", form);
+  /** 实时开火参数：决定连发专属输入的显隐与派生值展示 */
+  const fireMode = Form.useWatch("fireMode", form);
+  const fireRate = Form.useWatch("fireRate", form);
+  const minShotInterval = Form.useWatch("minShotInterval", form);
+  const burstSize = Form.useWatch("burstSize", form);
   /** 是否编辑模式 */
   const isEditing = Boolean(initialWeapon);
+  /** 是否连发模式 */
+  const isBurst = fireMode === "burst";
+
+  // 表单项可能为空，先收敛成数字再参与计算
+  const fireRateValue = fireRate ?? 0;
+  const minShotIntervalValue = minShotInterval ?? 0;
+  const burstSizeValue = burstSize ?? 0;
+
+  /** 全自动 / 单发的最短射击间隔：由射速自动换算，只读展示 */
+  const autoMinShotInterval = fireRateValue > 0 ? deriveMinShotInterval(fireRateValue) : 0;
+  /** 连发派生值是否可算：发数、官方射速与轮内间隔都合法才有意义 */
+  const hasBurstInputs = burstSizeValue >= 2 && fireRateValue > 0 && minShotIntervalValue > 0;
+  /** 每轮连发之间的间隔（ms）：连发周期由官方射速反推，此处只做展示 */
+  const burstGapMs = hasBurstInputs
+    ? round2(getBurstGapMs(burstSizeValue, fireRateValue, minShotIntervalValue))
+    : 0;
+  /** 前两轮等效射速（RPM）：口径见 utils/burstTiming */
+  const twoRoundRpm = hasBurstInputs
+    ? round2(getBurstRoundRpm(burstSizeValue, fireRateValue, minShotIntervalValue, 2))
+    : 0;
+
+  /** 连发派生值文案：参数未填齐时改为提示需要补填的内容 */
+  const burstSummary = hasBurstInputs
+    ? `轮次间隔 ${burstGapMs} ms ・ 前两轮等效射速 ${twoRoundRpm} RPM`
+    : "填写一轮发数、官方射速与轮内间隔后，自动计算轮次间隔与前两轮等效射速";
 
   /** 每次打开时重置表单：编辑回填目标数据，新增回到默认值 */
   useEffect(() => {
@@ -115,8 +168,21 @@ export default function WeaponFormModal({
         start: index === 0 ? 0 : values.range[index - 1].end!,
         multiplier: item.multiplier,
       }));
+      const isBurstMode = values.fireMode === "burst";
+      /**
+       * 开火参数按模式换算：
+       * 全自动 / 单发的最短射击间隔由射速换算（保留一位小数），连发直接取填写的轮内间隔；
+       * 一轮发数只在连发模式下有意义，其它模式一律归 0。
+       */
+      const fireParams = {
+        fireMode: values.fireMode,
+        minShotInterval: isBurstMode
+          ? round1(values.minShotInterval)
+          : deriveMinShotInterval(values.fireRate),
+        burstSize: isBurstMode ? values.burstSize : 0,
+      };
       // 名称按命名规则规范化后再提交
-      onSubmit({ ...values, name: normalizeName(values.name), range });
+      onSubmit({ ...values, ...fireParams, name: normalizeName(values.name), range });
       form.resetFields();
     } catch {
       // 校验失败由表单自身展示错误提示
@@ -146,10 +212,13 @@ export default function WeaponFormModal({
           name="name"
           rules={[{ required: true, message: "请输入枪械名称" }]}
         >
-          <Input placeholder="例如 AS VAL - 海啸 或 MK4 - 三连发 - 赛季弹" />
+          <Input placeholder="例如 AS VAL - 海啸 或 MK4 - 击剑手 - 赛季弹" />
         </Form.Item>
 
         <Space size="middle" wrap>
+          <Form.Item label="开火模式" name="fireMode">
+            <Segmented<WeaponFireMode> options={FIRE_MODE_OPTIONS} />
+          </Form.Item>
           <Form.Item
             label="基础伤害"
             name={["damage", "base"]}
@@ -165,7 +234,7 @@ export default function WeaponFormModal({
             <InputNumber min={0} />
           </Form.Item>
           <Form.Item
-            label="射速 RPM"
+            label={isBurst ? "射速 RPM（即官方射速）" : "射速 RPM"}
             name="fireRate"
             rules={[{ required: true, message: "请输入射速" }]}
           >
@@ -182,6 +251,49 @@ export default function WeaponFormModal({
             </Form.Item>
           ))}
         </Space>
+
+        {/* 开火参数：连发需要补填发数与轮内间隔，其余模式的最短射击间隔由射速自动换算 */}
+        {isBurst ? (
+          <Space size="middle" wrap>
+            <Form.Item
+              label="一轮发数"
+              name="burstSize"
+              rules={[
+                { required: true, message: "请输入一轮发数" },
+                { type: "number", min: 2, message: "一轮发数至少 2 发" },
+              ]}
+            >
+              <InputNumber min={2} precision={0} />
+            </Form.Item>
+            <Form.Item
+              label="一轮连发内部间隔"
+              name="minShotInterval"
+              rules={[{ required: true, message: "请输入一轮连发内部间隔" }]}
+            >
+              <InputNumber min={0.1} step={0.1} precision={1} addonAfter="ms" />
+            </Form.Item>
+          </Space>
+        ) : (
+          <Form.Item label="最短射击间隔（由射速自动计算）">
+            <InputNumber readOnly value={autoMinShotInterval} addonAfter="ms" />
+          </Form.Item>
+        )}
+
+        {/* 连发派生值：周期由官方射速反推，轮次间隔与前两轮等效射速实时展示 */}
+        {isBurst && (
+          <>
+            <Typography.Text type="secondary" style={HINT_STYLE}>
+              {burstSummary}
+            </Typography.Text>
+            {/* 参数冲突提示：轮内间隔之和超过周期时轮次间隔为负，需要用户修正输入 */}
+            {hasBurstInputs && burstGapMs < 0 && (
+              <Typography.Text type="warning" style={HINT_STYLE}>
+                轮内间隔之和已超过周期，轮次间隔为负，请调小一轮连发内部间隔或调大射速
+              </Typography.Text>
+            )}
+          </>
+        )}
+
         <Form.Item label="射程分段" required>
           <Form.List
             name="range"

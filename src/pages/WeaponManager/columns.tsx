@@ -2,6 +2,8 @@ import type { TableColumnsType } from 'antd'
 import { Button, Popconfirm, Space } from 'antd'
 import RangeBar, { RANGE_COLUMN_WIDTH } from '@/components/RangeBar'
 import type { HitboxPart, WeaponRecord } from '@/types/weapon'
+import { WEAPON_FIRE_MODES } from '@/types/weapon'
+import { getFireModeLabel } from '@/utils/weaponFire'
 
 /** 各受击部位的中文名，顺序即表格列顺序 */
 const PART_LABELS: ReadonlyArray<{ part: HitboxPart; label: string }> = [
@@ -53,11 +55,30 @@ export function buildColumns(
       sorter: (a, b) => a.damage.armor - b.damage.armor,
     },
     {
+      title: '开火模式',
+      dataIndex: 'fireMode',
+      key: 'fireMode',
+      align: 'center',
+      // 展示文案由 weaponFire 统一给出：全自动 / X连发 / 单发
+      render: (_value, row) => getFireModeLabel(row),
+      // 排序先按领域模型中的固定模式顺序，保证同模式聚在一起；同模式内再按发数比较，连发条目按发数递增
+      sorter: (a, b) =>
+        WEAPON_FIRE_MODES.indexOf(a.fireMode) - WEAPON_FIRE_MODES.indexOf(b.fireMode) ||
+        a.burstSize - b.burstSize,
+    },
+    {
       title: '射速 RPM',
       dataIndex: 'fireRate',
       key: 'fireRate',
       align: 'center',
       sorter: (a, b) => a.fireRate - b.fireRate,
+    },
+    {
+      title: '最短射击间隔 ms',
+      dataIndex: 'minShotInterval',
+      key: 'minShotInterval',
+      align: 'center',
+      sorter: (a, b) => a.minShotInterval - b.minShotInterval,
     },
     {
       title: '射程',

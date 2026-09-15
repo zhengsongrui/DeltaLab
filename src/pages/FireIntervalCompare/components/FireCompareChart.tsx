@@ -1,6 +1,6 @@
 import { Fragment, type CSSProperties } from 'react'
 import { Empty } from 'antd'
-import type { FireSegment } from '@/types/fireInterval'
+import type { ResolvedFireSegment } from '@/types/fireInterval'
 import { buildShotTimes } from '@/utils/fireInterval'
 import { getSegmentColor } from '../colors'
 import FireTrack from './FireTrack'
@@ -31,8 +31,8 @@ const NAME_STYLE: CSSProperties = {
 const TICK_STYLE: CSSProperties = { position: 'absolute', fontSize: 11, whiteSpace: 'nowrap' }
 
 interface FireCompareChartProps {
-  /** 需要对比的全部线段，顺序即纵向叠放顺序 */
-  segments: FireSegment[]
+  /** 需要对比的全部线段（解析后的展示态），顺序即纵向叠放顺序 */
+  segments: ResolvedFireSegment[]
   /** 时间窗口（毫秒），所有线段共用 */
   windowMs: number
 }

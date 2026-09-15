@@ -7,6 +7,29 @@
 export type HitboxPart = 'head' | 'chest' | 'abdomen' | 'limbs'
 
 /**
+ * 开火模式
+ * auto   全自动：最短射击间隔由射速换算
+ * burst  连发：最短射击间隔即一轮连发内部间隔，另需一轮发数推导轮次间隔
+ * single 单发：最短射击间隔由射速换算
+ */
+export type WeaponFireMode = 'auto' | 'burst' | 'single'
+
+/** 开火模式的中文文案，供表单切换与表格列共用，避免文案散落多处 */
+export const WEAPON_FIRE_MODE_LABELS: Record<WeaponFireMode, string> = {
+  auto: '全自动',
+  burst: '连发',
+  single: '单发',
+}
+
+/** 全部开火模式，按固定顺序排列，供表单模式切换与读取校验遍历 */
+export const WEAPON_FIRE_MODES: WeaponFireMode[] = ['auto', 'burst', 'single']
+
+/** 判断任意值是否为合法开火模式：供读取校验与导入解析复用 */
+export function isWeaponFireMode(value: unknown): value is WeaponFireMode {
+  return WEAPON_FIRE_MODES.includes(value as WeaponFireMode)
+}
+
+/**
  * 射程分段：从 start 米起应用对应倍率
  * 区间语义为 [start, 下一段 start)，最后一段无终点、一直生效
  */
@@ -26,8 +49,18 @@ export interface Weapon {
     base: number
     armor: number
   }
-  /** 射速，单位 RPM（每分钟发数） */
+  /** 开火模式：全自动 / 连发 / 单发 */
+  fireMode: WeaponFireMode
+  /** 射速，单位 RPM（每分钟发数）；连发模式下即官方标称射速 */
   fireRate: number
+  /**
+   * 最短射击间隔（毫秒，保留一位小数）
+   * 全自动 / 单发由射速换算得到（60000 ÷ 射速）；连发即「一轮连发内部间隔」，
+   * 需配合 burstSize 才能推导连发周期与轮次间隔。
+   */
+  minShotInterval: number
+  /** 一轮连发的发数；非连发模式为 0 */
+  burstSize: number
   /** 射程倍率表，按距离分段衰减 */
   range: WeaponRange[]
   /** 各受击部位对应的伤害倍率 */

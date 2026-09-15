@@ -2,6 +2,7 @@ import type { TableColumnsType } from 'antd'
 import type { ColumnGroup } from './components/ColumnSelector'
 import type { StatsRow, ViewMode } from './rows'
 import RangeBar, { RANGE_COLUMN_WIDTH } from '@/components/RangeBar'
+import { WEAPON_FIRE_MODES } from '@/types/weapon'
 import type { HitWeight } from '@/utils/dps'
 import {
   calculateArmorDps,
@@ -55,6 +56,7 @@ export function buildColumnGroups(view: ViewMode): ReadonlyArray<ColumnGroup> {
           options: [
             { key: 'damage-base', label: '基础伤害' },
             { key: 'damage-armor', label: '护甲伤害' },
+            { key: 'fireMode', label: '开火模式' },
             { key: 'fireRate', label: '射速 RPM' },
             { key: 'range', label: '各段射程伤害倍率' },
             { key: 'distance-multiplier', label: '当前距离伤害倍率' },
@@ -65,6 +67,7 @@ export function buildColumnGroups(view: ViewMode): ReadonlyArray<ColumnGroup> {
           options: [
             { key: 'damage-base', label: '基础伤害' },
             { key: 'damage-armor', label: '护甲伤害' },
+            { key: 'fireMode', label: '开火模式' },
             { key: 'fireRate', label: '射速 RPM' },
             { key: 'range-multiplier', label: '当前射程伤害倍率' },
           ],
@@ -156,9 +159,27 @@ export function buildColumns(
         ]
 
   return [
-    // 枪械名称保持左对齐以便扫读名称，其余列一律居中
-    { title: '枪械名称', dataIndex: 'name', key: 'name' },
+    // 枪械名称保持左对齐以便扫读名称，其余列一律居中；
+    // 连发武器会展开成多条数据，名称后追加轮次标识（如「2轮3连发」）以区分行，行内 name 仍为原名
+    {
+      title: '枪械名称',
+      dataIndex: 'name',
+      key: 'name',
+      render: (_value, row) => (row.roundLabel === '' ? row.name : `${row.name} ${row.roundLabel}`),
+    },
     ...infoColumns,
+    // 开火模式：文案由 weaponFire 统一给出，连发按发数展示为「Y连发」
+    {
+      title: '开火模式',
+      key: 'fireMode',
+      align: 'center',
+      // 排序先按领域模型中的固定模式顺序，同模式内再按发数比较
+      sorter: (a, b) =>
+        WEAPON_FIRE_MODES.indexOf(a.fireMode) - WEAPON_FIRE_MODES.indexOf(b.fireMode) ||
+        a.burstSize - b.burstSize,
+      render: (_value, row) => row.fireModeLabel,
+    },
+    // 射速 RPM：连发行取的是该轮次的等效射速，与 DPS 列同口径
     { title: '射速 RPM', dataIndex: 'fireRate', key: 'fireRate', align: 'center' },
     ...dpsColumns,
     {

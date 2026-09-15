@@ -1,22 +1,12 @@
-import type { CSSProperties } from 'react'
 import { Button, Card, Input, InputNumber, Segmented, Space, Typography } from 'antd'
-import type { FireSegment, FireSegmentMode } from '@/types/fireInterval'
-import { FIRE_SEGMENT_MODE_LABELS, FIRE_SEGMENT_MODES } from '@/types/fireInterval'
-import { BURST_ROUNDS, getSegmentStats } from '@/utils/fireInterval'
-
-/** 类型切换项：文案与取值都来自领域模型，避免文案散落 */
-const MODE_OPTIONS = FIRE_SEGMENT_MODES.map((mode) => ({
-  label: FIRE_SEGMENT_MODE_LABELS[mode],
-  value: mode,
-}))
-
-/** 卡片底部统计文案的统一排版：小字号，配合 type="secondary" 使用 */
-const HINT_STYLE: CSSProperties = { fontSize: 12 }
+import type { ManualFireSegment, ManualSegmentKind, ManualSegmentPatch } from '@/types/fireInterval'
+import { DEFAULT_BURST_SIZE, MANUAL_KIND_OPTIONS, MIN_BURST_SIZE } from '@/types/fireInterval'
+import SegmentStatsText from './SegmentStatsText'
 
 /** 输入框统一收敛为正整数：清空或非法输入时保留原值，避免出现 0 或 NaN */
-function toPositiveInt(value: number | null, fallback: number): number {
+function toPositiveInt(value: number | null, fallback: number, min = 1): number {
   if (value === null || !Number.isFinite(value)) return fallback
-  return Math.max(1, Math.round(value))
+  return Math.max(min, Math.round(value))
 }
 
 interface NumberFieldProps {
@@ -30,66 +20,68 @@ interface NumberFieldProps {
   step: number
   /** 允许的上限 */
   max: number
+  /** 允许的下限 */
+  min?: number
   /** 回传已收敛的正整数 */
   onChange: (value: number) => void
 }
 
-/** 带标签与单位的整数输入：卡片的三个输入框共用同一套收敛与排版规则 */
-function NumberField({ label, value, suffix, step, max, onChange }: NumberFieldProps) {
+/** 带标签与单位的整数输入：卡片的几个输入框共用同一套收敛与排版规则 */
+function NumberField({ label, value, suffix, step, max, min = 1, onChange }: NumberFieldProps) {
   return (
     <>
       <Typography.Text>{label}</Typography.Text>
       <InputNumber
         value={value}
-        min={1}
+        min={min}
         max={max}
         step={step}
         addonAfter={suffix}
-        onChange={(next) => onChange(toPositiveInt(next, value))}
+        onChange={(next) => onChange(toPositiveInt(next, value, min))}
       />
     </>
   )
 }
 
 interface SegmentCardProps {
-  /** 当前线段 */
-  segment: FireSegment
+  /** 当前手动线段 */
+  segment: ManualFireSegment
   /** 与对比区一致的取色 */
   color: string
-  /** 任意字段变化时回传整条线段 */
-  onChange: (next: FireSegment) => void
+  /** 字段变化时回传补丁，仅包含被改动的可编辑字段 */
+  onChange: (patch: ManualSegmentPatch) => void
   /** 删除该线段 */
   onRemove: () => void
 }
 
 /**
- * 线段编辑卡片
+ * 手动线段编辑卡片
  * 左侧色条与对比区同色，用于把卡片与轨道对应起来；
- * 全自动只填射速；连发类型填连发内间隔与官方射速，周期与轮次间隔由官方射速派生，
- * 统计值实时展示在卡片底部。
+ * 类型在全自动与连发之间切换：全自动只填射速；连发填写发数、轮内间隔与官方射速，
+ * 周期由官方射速派生。统计值实时展示在卡片底部。
  */
 export default function SegmentCard({ segment, color, onChange, onRemove }: SegmentCardProps) {
-  const isAuto = segment.mode === 'auto'
-  const stats = getSegmentStats(segment)
+  const isBurst = segment.burstSize >= MIN_BURST_SIZE
 
-  /** 补丁式更新：调用处只需指明变化的字段 */
-  function patch(part: Partial<FireSegment>): void {
-    onChange({ ...segment, ...part })
+  /** 补丁式更新：调用处只需指明变化的字段，直接转交父级合并 */
+  function patch(part: ManualSegmentPatch): void {
+    onChange(part)
   }
 
   /**
-   * 统计文案：全部由 utils/fireInterval 推导，实时反映输入变化。
-   * 全自动只有「射速 → 射击间隔」的换算，故只展示射击间隔；
-   * 连发以官方射速反推周期，平均射速恒等于官方射速、无需重复展示，改为展示轮次间隔与连发周期。
+   * 切换类型
+   * 切到全自动把发数归 0；切到连发沿用已填发数，此前为全自动时补默认发数。
    */
-  const summary = isAuto
-    ? `射击间隔 ${stats.shotIntervalMs} ms`
-    : `射击间隔 ${stats.shotIntervalMs} ms ・ 轮次间隔 ${stats.burstGapMs} ms ・ 一轮连发射速 ${stats.burstRpm} RPM ・ 连发周期 ${stats.cycleMs} ms`
-
-  /** 连发各轮等效射速：轮数越多越贴近官方射速，口径见 utils/fireInterval */
-  const roundRpm = BURST_ROUNDS.map(
-    (rounds, index) => `${rounds} 轮等效射速 ${stats.burstRpmByRounds[index]} RPM`,
-  ).join(' ・ ')
+  function handleKindChange(kind: ManualSegmentKind): void {
+    patch({
+      burstSize:
+        kind === 'auto'
+          ? 0
+          : segment.burstSize >= MIN_BURST_SIZE
+            ? segment.burstSize
+            : DEFAULT_BURST_SIZE,
+    })
+  }
 
   return (
     <Card
@@ -106,10 +98,10 @@ export default function SegmentCard({ segment, color, onChange, onRemove }: Segm
             onChange={(event) => patch({ name: event.target.value })}
             style={{ width: 160 }}
           />
-          <Segmented<FireSegmentMode>
-            options={MODE_OPTIONS}
-            value={segment.mode}
-            onChange={(mode) => patch({ mode })}
+          <Segmented<ManualSegmentKind>
+            options={[...MANUAL_KIND_OPTIONS]}
+            value={isBurst ? 'burst' : 'auto'}
+            onChange={handleKindChange}
           />
           <Button danger type="text" onClick={onRemove}>
             删除
@@ -117,19 +109,18 @@ export default function SegmentCard({ segment, color, onChange, onRemove }: Segm
         </Space>
 
         <Space wrap>
-          {isAuto ? (
-            // 全自动：射速直接决定射击间隔，无需其它参数
-            <NumberField
-              label="射速"
-              value={segment.fireRate}
-              suffix="RPM"
-              step={10}
-              max={2000}
-              onChange={(fireRate) => patch({ fireRate })}
-            />
-          ) : (
-            // 连发：轮内间隔决定一轮连发射速，周期由官方射速反推（周期 = 发数 × 60000 ÷ 官方射速）
+          {isBurst ? (
+            // 连发：发数决定一轮连发长度，轮内间隔决定一轮连发射速，周期由官方射速反推
             <>
+              <NumberField
+                label="连发发数"
+                value={segment.burstSize}
+                suffix="发"
+                step={1}
+                min={MIN_BURST_SIZE}
+                max={100}
+                onChange={(burstSize) => patch({ burstSize })}
+              />
               <NumberField
                 label="连发内间隔"
                 value={segment.burstInterval}
@@ -147,25 +138,20 @@ export default function SegmentCard({ segment, color, onChange, onRemove }: Segm
                 onChange={(officialRpm) => patch({ officialRpm })}
               />
             </>
+          ) : (
+            // 全自动 / 单发：射速直接决定射击间隔，无需其它参数
+            <NumberField
+              label="射速"
+              value={segment.fireRate}
+              suffix="RPM"
+              step={10}
+              max={2000}
+              onChange={(fireRate) => patch({ fireRate })}
+            />
           )}
         </Space>
 
-        <Typography.Text type="secondary" style={HINT_STYLE}>
-          {summary}
-        </Typography.Text>
-
-        {/* 参数冲突提示：轮内间隔之和超过周期时轮次间隔为负，轨道会重叠，需要用户修正输入 */}
-        {!isAuto && stats.burstGapMs < 0 && (
-          <Typography.Text type="warning" style={HINT_STYLE}>
-            轮内间隔之和已超过周期，轮次间隔为负，请调小连发内间隔或调大官方射速
-          </Typography.Text>
-        )}
-
-        {!isAuto && (
-          <Typography.Text type="secondary" style={HINT_STYLE}>
-            {roundRpm}
-          </Typography.Text>
-        )}
+        <SegmentStatsText timing={segment} />
       </Space>
     </Card>
   )

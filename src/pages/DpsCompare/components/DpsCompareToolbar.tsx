@@ -27,6 +27,8 @@ interface DpsCompareToolbarProps {
   filteredRowCount: number
   /** 打开综合 DPS 计算设置弹窗 */
   onOpenCompositeSetting: () => void
+  /** 打开连发模式武器控制弹窗 */
+  onOpenBurstControl: () => void
   /** 打开图表对比弹窗 */
   onOpenChart: () => void
 }
@@ -46,6 +48,7 @@ export default function DpsCompareToolbar({
   onSelectedWeaponNamesChange,
   filteredRowCount,
   onOpenCompositeSetting,
+  onOpenBurstControl,
   onOpenChart,
 }: DpsCompareToolbarProps) {
   /** 武器名勾选面板只含一个无标题分组，直接复用列选择器的勾选面板实现 */
@@ -85,6 +88,8 @@ export default function DpsCompareToolbar({
       />
       {/* 综合 DPS 设置：打开弹窗编辑四项命中权重，保存后综合 DPS 列自动重算 */}
       <Button onClick={onOpenCompositeSetting}>综合 DPS 设置</Button>
+      {/* 连发模式武器控制：设置连发武器在表格中展开的累计轮数 X，保存后行数据立即重算 */}
+      <Button onClick={onOpenBurstControl}>连发模式武器控制</Button>
       {/* 图表对比：打开弹窗以折线图对比多把枪械的 DPS 随距离变化 */}
       <Button onClick={onOpenChart}>图表对比</Button>
     </Space>

@@ -1,13 +1,13 @@
 import { useState } from 'react'
-import type { FireSegment, FireSegmentMode } from '@/types/fireInterval'
-import { FIRE_SEGMENT_MODE_LABELS, FIRE_SEGMENT_MODES } from '@/types/fireInterval'
+import type { FireSegment, ManualFireSegment, ManualSegmentPatch } from '@/types/fireInterval'
+import { MIN_BURST_SIZE } from '@/types/fireInterval'
 
 /**
  * 线段与时间窗口在 localStorage 中的存储键
- * v2 起连发字段由 burstGap 改为 officialRpm（周期改由官方射速反推），
+ * v3 起线段改为判别联合（手动存数值、导入只存 weaponId），并支持任意连发发数，
  * 键名同步升级以直接丢弃旧结构数据，避免兼容分支。
  */
-const STORAGE_KEY = 'delta-lab.fire-intervals.v2'
+const STORAGE_KEY = 'delta-lab.fire-intervals.v3'
 
 /** 时间窗口默认值（毫秒） */
 export const DEFAULT_WINDOW_MS = 1000
@@ -17,17 +17,19 @@ export const MIN_WINDOW_MS = 100
 export const MAX_WINDOW_MS = 5000
 
 /**
- * 各类型线段的默认参数
- * 全自动不使用连发字段，但为保持 FireSegment 结构一致仍填入默认值（计算时会被忽略）；
+ * 新增线段的默认数值
+ * 全自动只用射速决定射击间隔，其余字段为保持结构完整仍填默认值（计算时被忽略）；
  * 连发默认取 MK4 三连发的官方组合：官方射速 793 RPM、轮内间隔 52 ms。
  */
-const DEFAULT_PARAMS: Record<
-  FireSegmentMode,
-  Pick<FireSegment, 'fireRate' | 'burstInterval' | 'officialRpm'>
-> = {
-  auto: { fireRate: 600, burstInterval: 60, officialRpm: 600 },
-  burst3: { fireRate: 600, burstInterval: 52, officialRpm: 793 },
-  burst4: { fireRate: 600, burstInterval: 52, officialRpm: 793 },
+const AUTO_DEFAULTS: Omit<ManualFireSegment, 'id' | 'source' | 'name' | 'burstSize'> = {
+  fireRate: 600,
+  burstInterval: 60,
+  officialRpm: 600,
+}
+const BURST_DEFAULTS: Omit<ManualFireSegment, 'id' | 'source' | 'name' | 'burstSize'> = {
+  fireRate: 600,
+  burstInterval: 52,
+  officialRpm: 793,
 }
 
 /** 落盘结构 */
@@ -46,18 +48,36 @@ function isPositiveNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value) && value > 0
 }
 
-/** 校验单条线段：类型与全部数值字段都合法才保留，避免脏数据导致除零或空轨道 */
-function isFireSegment(value: unknown): value is FireSegment {
-  if (typeof value !== 'object' || value === null) return false
-  const item = value as Record<string, unknown>
+/** 判断连发发数是否合法：非负整数，0 表示全自动 / 单发 */
+function isBurstSize(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0
+}
+
+/** 校验手动线段：全部数值字段都合法才保留，避免脏数据导致除零或空轨道 */
+function isManualSegment(item: Record<string, unknown>): boolean {
   return (
     typeof item.id === 'string' &&
+    item.source === 'manual' &&
     typeof item.name === 'string' &&
-    FIRE_SEGMENT_MODES.includes(item.mode as FireSegmentMode) &&
+    isBurstSize(item.burstSize) &&
     isPositiveNumber(item.fireRate) &&
     isPositiveNumber(item.burstInterval) &&
     isPositiveNumber(item.officialRpm)
   )
+}
+
+/** 校验导入线段：只要求 id 与所引用的武器 id 合法 */
+function isWeaponSegment(item: Record<string, unknown>): boolean {
+  return (
+    typeof item.id === 'string' && item.source === 'weapon' && typeof item.weaponId === 'string'
+  )
+}
+
+/** 校验单条线段：按 source 判别两种形态 */
+function isFireSegment(value: unknown): value is FireSegment {
+  if (typeof value !== 'object' || value === null) return false
+  const item = value as Record<string, unknown>
+  return isManualSegment(item) || isWeaponSegment(item)
 }
 
 /** 把时间窗口限制在允许范围内，非法值回退默认 */
@@ -95,14 +115,16 @@ function writeState(state: StoredState): void {
 
 /** Hook 对外暴露的接口 */
 export interface FireSegmentsController {
-  /** 当前全部线段，顺序即展示顺序，同时决定取色下标 */
+  /** 当前全部线段（存储态），顺序即展示顺序，同时决定取色下标 */
   segments: FireSegment[]
   /** 当前时间窗口（毫秒） */
   windowMs: number
-  /** 新增一条指定类型的线段，名称按同类型现有数量递增 */
-  addSegment: (mode: FireSegmentMode) => void
-  /** 更新一条线段 */
-  updateSegment: (id: string, patch: Partial<FireSegment>) => void
+  /** 新增一条线段；burstSize 为 0 表示全自动，>= 2 表示连发发数 */
+  addSegment: (burstSize: number) => void
+  /** 按武器 id 导入线段：已导入的武器自动跳过，不产生重复 */
+  importWeapons: (weaponIds: string[]) => void
+  /** 更新一条手动线段；导入线段不受影响（只读） */
+  updateSegment: (id: string, patch: ManualSegmentPatch) => void
   /** 删除一条线段 */
   removeSegment: (id: string) => void
   /** 清空全部线段 */
@@ -115,6 +137,7 @@ export interface FireSegmentsController {
  * 射击间隔对比的线段与时间窗口 Hook
  * 线段、窗口与持久化是一组不可分割的状态，因此合并为单个 Hook 统一读写；
  * 所有改动都实时同步内存与 localStorage，页面无需「应用」按钮。
+ * 注意：导入线段只保存 weaponId，其数值在页面渲染时由武器库实时解析。
  */
 export function useFireSegments(): FireSegmentsController {
   /** 当前状态，初始值读取一次持久化结果 */
@@ -126,29 +149,47 @@ export function useFireSegments(): FireSegmentsController {
     writeState(next)
   }
 
-  /** 新增线段：按同类型现有数量递增命名，例如「三连发 1」「三连发 2」 */
-  function addSegment(mode: FireSegmentMode): void {
-    const sameModeCount = state.segments.filter((segment) => segment.mode === mode).length
-    const segment: FireSegment = {
+  /** 新增手动线段：按同类现有数量递增命名，例如「全自动 1」「连发 2」 */
+  function addSegment(burstSize: number): void {
+    const isBurst = burstSize >= MIN_BURST_SIZE
+    // 同类计数只统计手动线段，且连发与全自动分别计数，命名互不干扰
+    const sameKindCount = state.segments.filter(
+      (segment) =>
+        segment.source === 'manual' && (segment.burstSize >= MIN_BURST_SIZE) === isBurst,
+    ).length
+    const segment: ManualFireSegment = {
       id: createSegmentId(),
-      name: `${FIRE_SEGMENT_MODE_LABELS[mode]} ${sameModeCount + 1}`,
-      mode,
-      ...DEFAULT_PARAMS[mode],
+      source: 'manual',
+      name: `${isBurst ? '连发' : '全自动'} ${sameKindCount + 1}`,
+      burstSize: isBurst ? Math.round(burstSize) : 0,
+      ...(isBurst ? BURST_DEFAULTS : AUTO_DEFAULTS),
     }
     commit({ ...state, segments: [...state.segments, segment] })
   }
 
-  /** 更新线段：按 id 合并补丁字段 */
-  function updateSegment(id: string, patch: Partial<FireSegment>): void {
+  /** 导入武器：仅记录 weaponId，已导入的武器跳过，避免重复线段 */
+  function importWeapons(weaponIds: string[]): void {
+    const existing = new Set(
+      state.segments.flatMap((segment) => (segment.source === 'weapon' ? [segment.weaponId] : [])),
+    )
+    const additions: FireSegment[] = weaponIds
+      .filter((weaponId) => !existing.has(weaponId))
+      .map((weaponId) => ({ id: createSegmentId(), source: 'weapon', weaponId }))
+    if (additions.length === 0) return
+    commit({ ...state, segments: [...state.segments, ...additions] })
+  }
+
+  /** 更新手动线段：按 id 合并补丁字段；导入线段只读，不在更新范围内 */
+  function updateSegment(id: string, patch: ManualSegmentPatch): void {
     commit({
       ...state,
       segments: state.segments.map((segment) =>
-        segment.id === id ? { ...segment, ...patch } : segment,
+        segment.id === id && segment.source === 'manual' ? { ...segment, ...patch } : segment,
       ),
     })
   }
 
-  /** 删除线段 */
+  /** 删除线段：手动与导入线段都允许移出对比 */
   function removeSegment(id: string): void {
     commit({ ...state, segments: state.segments.filter((segment) => segment.id !== id) })
   }
@@ -162,6 +203,7 @@ export function useFireSegments(): FireSegmentsController {
     segments: state.segments,
     windowMs: state.windowMs,
     addSegment,
+    importWeapons,
     updateSegment,
     removeSegment,
     clearSegments,

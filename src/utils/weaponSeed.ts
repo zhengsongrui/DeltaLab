@@ -18,11 +18,10 @@ import type { Weapon, WeaponRecord, WeaponSeed } from '@/types/weapon'
 import { createWeaponId } from '@/utils/weaponId'
 
 /**
- * 计算武器数值指纹
- * 覆盖全部会影响展示与 DPS 的字段（含名称），因此「改数值」与「改名」都算用户改动；
- * 只要记录指纹与 seedHash 不一致，即认为用户已改动过该内置条目。
+ * 新旧指纹口径共用的基础字段部分
+ * 拼接顺序即指纹内容，一经发布不可调整，否则会与已存的 seedHash 全部失配。
  */
-export function weaponFingerprint(weapon: Weapon): string {
+function fingerprintParts(weapon: Weapon): Array<string | number> {
   const range = weapon.range.map((segment) => `${segment.start}:${segment.multiplier}`).join(',')
   const { head, chest, abdomen, limbs } = weapon.hitMultiplier
   return [
@@ -35,7 +34,35 @@ export function weaponFingerprint(weapon: Weapon): string {
     chest,
     abdomen,
     limbs,
-  ].join('|')
+  ]
+}
+
+/**
+ * 新增开火参数之前的旧指纹口径
+ * 老用户记录里的 seedHash 由旧口径生成，升级后必须仍能与其比对，
+ * 否则全部内置条目会被误判为「用户已改动」而降级，永久失去内置数据同步能力。
+ */
+function legacyFingerprint(weapon: Weapon): string {
+  return fingerprintParts(weapon).join('|')
+}
+
+/**
+ * 计算武器数值指纹
+ * 覆盖全部会影响展示与 DPS 的字段（含名称与开火参数），因此「改数值」与「改名」都算用户改动；
+ * 只要记录指纹与 seedHash 不一致，即认为用户已改动过该内置条目。
+ */
+export function weaponFingerprint(weapon: Weapon): string {
+  return [...fingerprintParts(weapon), weapon.fireMode, weapon.minShotInterval, weapon.burstSize].join(
+    '|',
+  )
+}
+
+/** 判断内置条目是否被用户改动过：新旧两套口径任一与基线一致，即视为「用户没动过」 */
+function isModifiedByUser(record: WeaponRecord): boolean {
+  if (record.seedHash === undefined) return true
+  return (
+    weaponFingerprint(record) !== record.seedHash && legacyFingerprint(record) !== record.seedHash
+  )
 }
 
 /** 去掉内置种子上的 key，只取纯武器数值，避免 key 混入存储记录 */
@@ -43,7 +70,10 @@ function toWeapon(seed: WeaponSeed): Weapon {
   return {
     name: seed.name,
     damage: seed.damage,
+    fireMode: seed.fireMode,
     fireRate: seed.fireRate,
+    minShotInterval: seed.minShotInterval,
+    burstSize: seed.burstSize,
     range: seed.range,
     hitMultiplier: seed.hitMultiplier,
   }
@@ -104,8 +134,8 @@ export function mergeWithSeed(
 
     const seedKey = record.seedKey as string
     const seed = seedByKey.get(seedKey)
-    // 指纹与基线不一致即视为用户改动过
-    const modified = weaponFingerprint(record) !== record.seedHash
+    // 指纹与基线不一致即视为用户改动过（含旧指纹口径兼容）
+    const modified = isModifiedByUser(record)
 
     if (!seed) {
       // 该条目已从新版内置数据中移除

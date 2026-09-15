@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "React 18 + TypeScript + Electron 双端应用（支持 Web 静态部署与 Windows 桌面打包）",
+  "author": "DeltaLab",
   "main": "out/main/index.js",
   "engines": {
     "node": ">=18"
